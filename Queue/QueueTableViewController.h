@@ -8,26 +8,18 @@
 
 #import <MediaPlayer/MediaPlayer.h>
 
-
-@protocol QueueTableViewControllerDelegate; // forward declaration
-
-@interface QueueTableViewController : UITableViewController <MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource>
+@interface QueueTableViewController : UITableViewController < MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource>
 {
-    __unsafe_unretained id <QueueTableViewControllerDelegate> delegate;
     IBOutlet UITableView *currentQueue;
     //IBOutlet UIBarButtonItem *songInfo; Do we want this? for voting?
     IBOutlet UIBarButtonItem *addMusicButton;
     
 }
 
-@property (nonatomic, assign) id <QueueTableViewControllerDelegate> delegate;
 @property (nonatomic) UITableView *currentQueue;
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 
 @end
 
-@protocol QueueTableViewControllerDelegate
 
-- (void) updatePlayerQueueWithMediaCollection: (MPMediaItemCollection *) mediaItemCollection;
 
-@end

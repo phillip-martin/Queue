@@ -9,19 +9,14 @@
 #import "QueueTableViewController.h"
 #import "QueueViewController.h"
 
-
-@interface QueueTableViewController ()
-
-@end
-
 @implementation QueueTableViewController
 
 @synthesize currentQueue;
-@synthesize delegate;
 @synthesize addMusicButton;
 
 
-- (IBAction) addHandler: (UIBarButtonItem *)addButton {
+
+- (IBAction) addHandler {
     
 	MPMediaPickerController *mediaPicker =
     [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
@@ -29,14 +24,14 @@
 	mediaPicker.delegate = self;
 	mediaPicker.allowsPickingMultipleItems = YES;
 	mediaPicker.prompt = NSLocalizedString (@"Add a song to the queue", @"Choose a song to add to the queue");
-	
-	[mediaPicker loadView];
+
     
     if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
         [self presentViewController:mediaPicker animated:YES completion:nil];
     } else {
         [self presentModalViewController:mediaPicker animated:YES];
     }
+    
     
 
 }
@@ -45,16 +40,11 @@
 {
     [super viewDidLoad];
     
-    [self setAddMusicButton: [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
-                                                              target: self
-                                                              action: @selector(addHandler:)]];
-    
-    self.navigationItem.rightBarButtonItem = self.addMusicButton;
-    self.tableView.dataSource = self;
-    self.tableView.delegate = self;
-    
-
+    self.currentQueue.dataSource = self;
+    self.currentQueue.delegate = self;
 }
+
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -72,9 +62,9 @@
     } else {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
-    
-	[self.delegate updatePlayerQueueWithMediaCollection: mediaItemCollection];
-    
+    UINavigationController *navBar = self.tabBarController.viewControllers[0];
+    QueueViewController *mainView = navBar.viewControllers[0];
+	[mainView updatePlayerQueueWithMediaCollection: mediaItemCollection];
 	[self.currentQueue reloadData];
     
 	//[[UIApplication sharedApplication] setStatusBarStyle: UIStatusBarStyleDefault animated:YES];
@@ -86,25 +76,14 @@
     } else {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
-	
-	//[[UIApplication sharedApplication] setStatusBarStyle: UIStatusBarStyleDefault animated: YES];
 
-}
-
-
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-
-    // all songs are in the same section
-    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    QueueViewController *mainView = (QueueViewController *) self.delegate;
+    UINavigationController *navBar = self.tabBarController.viewControllers[0];
+    QueueViewController *mainView = navBar.viewControllers[0];
     MPMediaItemCollection *songs  = mainView.songQueue;
     return [songs.items count];
 }
@@ -115,20 +94,22 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 
-    QueueViewController *mainView = (QueueViewController *) self.delegate;
+    UINavigationController *navBar = self.tabBarController.viewControllers[0];
+    QueueViewController *mainView = navBar.viewControllers[0];
     MPMediaItemCollection *songs  = mainView.songQueue;
 	MPMediaItem *anItem = (MPMediaItem *)[songs.items objectAtIndex: [indexPath row]];
+    NSLog(@"%ul", [songs.items count]);
     
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                       reuseIdentifier:CellIdentifier];
     }
+    
 	
     cell.textLabel.text = [anItem valueForProperty:MPMediaItemPropertyTitle];
     cell.detailTextLabel.text = [anItem valueForProperty:MPMediaItemPropertyArtist];
     
 	[tableView deselectRowAtIndexPath: indexPath animated: YES];
-    NSLog(@"Here!!!");
     return cell;
 }
 
@@ -136,6 +117,9 @@
     
 	[tableView deselectRowAtIndexPath: indexPath animated: YES];
 }
+
+
+
 
 
 
