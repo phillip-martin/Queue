@@ -19,6 +19,7 @@
 @property (nonatomic) UITableView *currentQueue;
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 
+
 @end
 
 
