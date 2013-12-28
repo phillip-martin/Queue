@@ -1,46 +1,29 @@
 //
-//  NTViewController.m
-//  HiBeacons
+//  BTLEViewController.m
+//  Queue
 //
-//  Created by Nick Toumpelis on 2013-10-06.
-//  Copyright (c) 2013 Nick Toumpelis.
-//
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-//
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
+//  Created by Ethan on 12/26/13.
+//  Copyright (c) 2013 Ethan. All rights reserved.
 //
 
-#import "BTLEViewController.h"
+#define TRANSFER_SERVICE_UUID           @"E20A39F4-73F5-4BC4-A12F-17D1AD07A961"
+#define TRANSFER_CHARACTERISTIC_UUID    @"08590F7E-DB05-467E-8757-72F6FAEB13D4"
+#define TRANSFER_CHARACTERISTIC_ITUNES_UUID    @"08590F7E-DB05-467E-8757-72F6FAEB13D3"
 
-static NSString * const kUUID = @"80407900-0500-0040-0000-000800000000";
-static NSString * const kIdentifier = @"SomeIdentifier";
+#define NOTIFY_MTU 20
 
-static NSString * const kOperationCellIdentifier = @"SettingsCell";
-static NSString * const kBeaconCellIdentifier = @"BeaconCell";
+static NSString * const kOperationCellIdentifier = @"Settings";
+static NSString * const kBeaconCellIdentifier = @"Host";
 
-static NSString * const kAdvertisingOperationTitle = @"Advertising";
-static NSString * const kRangingOperationTitle = @"Ranging";
+static NSString * const kAdvertisingOperationTitle = @"Host A PlayList";
+static NSString * const kRangingOperationTitle = @"Find A Playlist";
 static NSUInteger const kNumberOfSections = 2;
 static NSUInteger const kNumberOfAvailableOperations = 2;
 static CGFloat const kOperationCellHeight = 44;
 static CGFloat const kBeaconCellHeight = 52;
-static NSString * const kBeaconSectionTitle = @"Looking for beacons...";
+static NSString * const kBeaconSectionTitle = @"Looking for playlists...";
 static CGPoint const kActivityIndicatorPosition = (CGPoint){205, 12};
-static NSString * const kBeaconsHeaderViewIdentifier = @"BeaconsHeader";
+static NSString * const kBeaconsHeaderViewIdentifier = @"HostHeader";
 
 typedef NS_ENUM(NSUInteger, NTSectionType) {
     NTOperationsSection,
@@ -52,91 +35,111 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     NTRangingRow
 };
 
+#import "BTLEViewController.h"
+#import "QueueTableViewController.h"
+#import "QueueViewController.h"
+#import "SongStruct.h"
 
+@interface BTLEViewController ()
+
+@end
 
 @implementation BTLEViewController
+@synthesize detectedPeripherals;
 
-- (void)createBeaconRegion
-{
-    if (self.beaconRegion)
-        return;
-    
-    NSUUID *proximityUUID = [[NSUUID alloc] initWithUUIDString:kUUID];
-    self.beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:proximityUUID identifier:kIdentifier];
-}
 
-- (void)turnOnRanging
+- (void)viewDidLoad
 {
-    NSLog(@"Turning on ranging...");
+    [super viewDidLoad];
+	// Do any additional setup after loading the view.
     
-    if (![CLLocationManager isRangingAvailable]) {
-        NSLog(@"Couldn't turn on ranging: Ranging is not available.");
-        self.rangingSwitch.on = NO;
-        return;
-    }
+    // And somewhere to store the incoming data
+    self.data = [[NSMutableData alloc] init];
+    self.detectedPeripherals = [[NSMutableArray alloc] init];
+    self.hostName = @"";
     
-    if (self.locationManager.rangedRegions.count > 0) {
-        NSLog(@"Didn't turn on ranging: Ranging already on.");
-        return;
-    }
+    //load our itunes library regardless of whether we are a host or not
+    MPMediaQuery *everything = [[MPMediaQuery alloc] init];
     
-    [self createBeaconRegion];
-    [self.locationManager startRangingBeaconsInRegion:self.beaconRegion];
-    
-    NSLog(@"Ranging turned on for region: %@.", self.beaconRegion);
-}
-
-- (void)changeRangingState:(id)sender
-{
-    UISwitch *theSwitch = (UISwitch *)sender;
-    if (theSwitch.on) {
-        [self startRangingForBeacons];
-    } else {
-        [self stopRangingForBeacons];
+    NSLog(@"Logging items from a generic query...");
+    NSArray *itemsFromGenericQuery = [everything items];
+    for (MPMediaItem *song in itemsFromGenericQuery) {
+        NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyTitle],@"title")];
+        NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyArtist],@"artist")];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0];
+        NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
+        [self.myLibrary setObject:newSong forKey:tempID];
+        NSLog (@"%@", tempTitle);
     }
 }
 
-- (void)startRangingForBeacons
+- (void)didReceiveMemoryWarning
 {
-    self.locationManager = [[CLLocationManager alloc] init];
-    self.locationManager.delegate = self;
-    
-    self.detectedBeacons = [NSArray array];
-    
-    [self turnOnRanging];
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
 
-- (void)stopRangingForBeacons
+/** Start advertising
+ */
+- (IBAction)advertisingSwitchChanged:(id)sender
 {
-    if (self.locationManager.rangedRegions.count == 0) {
-        NSLog(@"Didn't turn off ranging: Ranging already off.");
-        return;
+    if (self.advertisingSwitch.on) {
+        self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
+        if([self.hostName  isEqual: @""]){
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Playlist Name"
+                                                        message:@"Please enter a name for your playlist"
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                              otherButtonTitles:@"OK", nil];
+            alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+            [alert show];
+        }
+        NSDictionary *advData = @{CBAdvertisementDataLocalNameKey:self.hostName, CBAdvertisementDataServiceUUIDsKey:@[[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]]};
+        [self.peripheralManager startAdvertising:advData];
+        NSLog(@"Advertising started");
     }
     
-    [self.locationManager stopRangingBeaconsInRegion:self.beaconRegion];
+    else {
+        [self.peripheralManager stopAdvertising];
+        [self.peripheralManager setDelegate:nil];
+        self.peripheralManager = nil;
+    }
+}
+
+/** Start ranging
+ */
+- (IBAction)rangingSwitchChanged:(id)sender
+{
+    if (self.rangingSwitch.on) {
+        // Start up the CBCentralManager
+        self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+        
+    }
     
-    NSIndexSet *deletedSections = [self deletedSections];
-    self.detectedBeacons = [NSArray array];
-    
-    [self.beaconTableView beginUpdates];
-    if (deletedSections)
-        [self.beaconTableView deleteSections:deletedSections withRowAnimation:UITableViewRowAnimationFade];
-    [self.beaconTableView endUpdates];
-    
-    NSLog(@"Turned off ranging.");
+    else {
+        [self.centralManager stopScan];
+        [self.centralManager setDelegate:nil];
+        self.centralManager = nil;
+        NSIndexSet *deletedSections = [self deletedSections];
+        [self.detectedPeripherals removeAllObjects];
+        
+        [self.peripheralView beginUpdates];
+        if (deletedSections)
+            [self.peripheralView deleteSections:deletedSections withRowAnimation:UITableViewRowAnimationFade];
+        [self.peripheralView endUpdates];
+    }
 }
 
 #pragma mark - Index path management
-- (NSArray *)indexPathsOfRemovedBeacons:(NSArray *)beacons
+- (NSArray *)indexPathsOfRemovedPeripherals:(NSArray *)peripheralArray
 {
     NSMutableArray *indexPaths = nil;
     
     NSUInteger row = 0;
-    for (CLBeacon *existingBeacon in self.detectedBeacons) {
+    for (CBPeripheral *existingPeripheral in self.detectedPeripherals) {
         BOOL stillExists = NO;
-        for (CLBeacon *beacon in beacons) {
-            if ((existingBeacon.major.integerValue == beacon.major.integerValue) &&
-                (existingBeacon.minor.integerValue == beacon.minor.integerValue)) {
+        for (CBPeripheral *tempPeripheral in peripheralArray) {
+            if (existingPeripheral.name == tempPeripheral.name) {
                 stillExists = YES;
                 break;
             }
@@ -152,16 +155,15 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     return indexPaths;
 }
 
-- (NSArray *)indexPathsOfInsertedBeacons:(NSArray *)beacons
+- (NSArray *)indexPathsOfInsertedPeripherals:(NSArray *)peripheralArray
 {
     NSMutableArray *indexPaths = nil;
     
     NSUInteger row = 0;
-    for (CLBeacon *beacon in beacons) {
+    for (CBPeripheral *tempPeripheral in peripheralArray) {
         BOOL isNewBeacon = YES;
-        for (CLBeacon *existingBeacon in self.detectedBeacons) {
-            if ((existingBeacon.major.integerValue == beacon.major.integerValue) &&
-                (existingBeacon.minor.integerValue == beacon.minor.integerValue)) {
+        for (CBPeripheral *existingPeripheral in self.detectedPeripherals) {
+            if (existingPeripheral.name == tempPeripheral.name) {
                 isNewBeacon = NO;
                 break;
             }
@@ -177,10 +179,10 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     return indexPaths;
 }
 
-- (NSArray *)indexPathsForBeacons:(NSArray *)beacons
+- (NSArray *)indexPathsForPeripherals:(NSArray *)peripheralArray
 {
     NSMutableArray *indexPaths = [NSMutableArray new];
-    for (NSUInteger row = 0; row < beacons.count; row++) {
+    for (NSUInteger row = 0; row < peripheralArray.count; row++) {
         [indexPaths addObject:[NSIndexPath indexPathForRow:row inSection:NTDetectedBeaconsSection]];
     }
     
@@ -189,7 +191,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
 
 - (NSIndexSet *)insertedSections
 {
-    if (self.rangingSwitch.on && [self.beaconTableView numberOfSections] == kNumberOfSections - 1) {
+    if (self.rangingSwitch.on && [self.peripheralView numberOfSections] == kNumberOfSections - 1) {
         return [NSIndexSet indexSetWithIndex:1];
     } else {
         return nil;
@@ -198,203 +200,25 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
 
 - (NSIndexSet *)deletedSections
 {
-    if (!self.rangingSwitch.on && [self.beaconTableView numberOfSections] == kNumberOfSections) {
+    if (!self.rangingSwitch.on && [self.peripheralView numberOfSections] == kNumberOfSections) {
         return [NSIndexSet indexSetWithIndex:1];
     } else {
         return nil;
     }
 }
 
-- (NSArray *)filteredBeacons:(NSArray *)beacons
-{
-    // Filters duplicate beacons out; this may happen temporarily if the originating device changes its Bluetooth id
-    NSMutableArray *mutableBeacons = [beacons mutableCopy];
-    
-    NSMutableSet *lookup = [[NSMutableSet alloc] init];
-    for (int index = 0; index < [beacons count]; index++) {
-        CLBeacon *curr = [beacons objectAtIndex:index];
-        NSString *identifier = [NSString stringWithFormat:@"%@/%@", curr.major, curr.minor];
-        
-        // this is very fast constant time lookup in a hash table
-        if ([lookup containsObject:identifier]) {
-            [mutableBeacons removeObjectAtIndex:index];
-        } else {
-            [lookup addObject:identifier];
-        }
-    }
-    
-    return [mutableBeacons copy];
-}
-
-#pragma mark - Beacon ranging delegate methods
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
-{
-    if (![CLLocationManager locationServicesEnabled]) {
-        NSLog(@"Couldn't turn on ranging: Location services are not enabled.");
-        self.rangingSwitch.on = NO;
-        return;
-    }
-    
-    if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
-        NSLog(@"Couldn't turn on ranging: Location services not authorised.");
-        self.rangingSwitch.on = NO;
-        return;
-    }
-    
-    self.rangingSwitch.on = YES;
-}
-
-- (void)locationManager:(CLLocationManager *)manager
-        didRangeBeacons:(NSArray *)beacons
-               inRegion:(CLBeaconRegion *)region {
-    NSArray *filteredBeacons = [self filteredBeacons:beacons];
-    
-    if (filteredBeacons.count == 0) {
-        NSLog(@"No beacons found nearby.");
-    } else {
-        NSLog(@"Found %lu %@.", (unsigned long)[filteredBeacons count],
-              [filteredBeacons count] > 1 ? @"beacons" : @"beacon");
-    }
-    
-    NSIndexSet *insertedSections = [self insertedSections];
-    NSIndexSet *deletedSections = [self deletedSections];
-    NSArray *deletedRows = [self indexPathsOfRemovedBeacons:filteredBeacons];
-    NSArray *insertedRows = [self indexPathsOfInsertedBeacons:filteredBeacons];
-    NSArray *reloadedRows = nil;
-    if (!deletedRows && !insertedRows)
-        reloadedRows = [self indexPathsForBeacons:filteredBeacons];
-    
-    self.detectedBeacons = filteredBeacons;
-    
-    [self.beaconTableView beginUpdates];
-    if (insertedSections)
-        [self.beaconTableView insertSections:insertedSections withRowAnimation:UITableViewRowAnimationFade];
-    if (deletedSections)
-        [self.beaconTableView deleteSections:deletedSections withRowAnimation:UITableViewRowAnimationFade];
-    if (insertedRows)
-        [self.beaconTableView insertRowsAtIndexPaths:insertedRows withRowAnimation:UITableViewRowAnimationFade];
-    if (deletedRows)
-        [self.beaconTableView deleteRowsAtIndexPaths:deletedRows withRowAnimation:UITableViewRowAnimationFade];
-    if (reloadedRows)
-        [self.beaconTableView reloadRowsAtIndexPaths:reloadedRows withRowAnimation:UITableViewRowAnimationNone];
-    [self.beaconTableView endUpdates];
-}
-
-#pragma mark - Beacon advertising
-- (void)turnOnAdvertising
-{
-    if (self.peripheralManager.state != CBPeripheralManagerStatePoweredOn) {
-        NSLog(@"Peripheral manager is off.");
-        self.advertisingSwitch.on = NO;
-        return;
-    }
-    
-    time_t t;
-    srand((unsigned) time(&t));
-    CLBeaconRegion *region = [[CLBeaconRegion alloc] initWithProximityUUID:self.beaconRegion.proximityUUID
-                                                                     major:rand()
-                                                                     minor:rand()
-                                                                identifier:self.beaconRegion.identifier];
-    NSDictionary *beaconPeripheralData = [region peripheralDataWithMeasuredPower:nil];
-    [self.peripheralManager startAdvertising:beaconPeripheralData];
-    
-    NSLog(@"Turning on advertising for region: %@.", region);
-}
-
-- (void)changeAdvertisingState:(id)sender
-{
-    UISwitch *theSwitch = (UISwitch *)sender;
-    if (theSwitch.on) {
-        [self startAdvertisingBeacon];
-    } else {
-        [self stopAdvertisingBeacon];
-    }
-}
-
-- (void)startAdvertisingBeacon
-{
-    NSLog(@"Turning on advertising...");
-    
-    [self createBeaconRegion];
-    
-    if (!self.peripheralManager)
-        self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil options:nil];
-    
-    [self turnOnAdvertising];
-}
-
-- (void)stopAdvertisingBeacon
-{
-    [self.peripheralManager stopAdvertising];
-    
-    NSLog(@"Turned off advertising.");
-}
-
-#pragma mark - Beacon advertising delegate methods
-- (void)peripheralManagerDidStartAdvertising:(CBPeripheralManager *)peripheralManager error:(NSError *)error
-{
-    if (error) {
-        NSLog(@"Couldn't turn on advertising: %@", error);
-        self.advertisingSwitch.on = NO;
-        return;
-    }
-    
-    if (peripheralManager.isAdvertising) {
-        NSLog(@"Turned on advertising.");
-        self.advertisingSwitch.on = YES;
-    }
-}
-
-- (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheralManager
-{
-    if (peripheralManager.state != CBPeripheralManagerStatePoweredOn) {
-        NSLog(@"Peripheral manager is off.");
-        self.advertisingSwitch.on = NO;
-        return;
-    }
-    
-    NSLog(@"Peripheral manager is on.");
-    [self turnOnAdvertising];
-}
-
-#pragma mark - Table view functionality
-- (NSString *)detailsStringForBeacon:(CLBeacon *)beacon
-{
-    NSString *proximity;
-    switch (beacon.proximity) {
-        case CLProximityNear:
-            proximity = @"Near";
-            break;
-        case CLProximityImmediate:
-            proximity = @"Immediate";
-            break;
-        case CLProximityFar:
-            proximity = @"Far";
-            break;
-        case CLProximityUnknown:
-        default:
-            proximity = @"Unknown";
-            break;
-    }
-    
-    NSString *format = @"%@, %@ • %@ • %f • %li";
-    return [NSString stringWithFormat:format, beacon.major, beacon.minor, proximity, beacon.accuracy, beacon.rssi];
-}
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = nil;
-    NSLog(@"section:%ul row:%ul", indexPath.section, indexPath.row);
     switch (indexPath.section) {
         case NTOperationsSection: {
             cell = [tableView dequeueReusableCellWithIdentifier:kOperationCellIdentifier];
             switch (indexPath.row) {
                 case NTAdvertisingRow:
-                    NSLog(@"Here");
                     cell.textLabel.text = kAdvertisingOperationTitle;
                     self.advertisingSwitch = (UISwitch *)cell.accessoryView;
                     [self.advertisingSwitch addTarget:self
-                                               action:@selector(changeAdvertisingState:)
+                                               action:@selector(advertisingSwitchChanged:)
                                      forControlEvents:UIControlEventValueChanged];
                     break;
                 case NTRangingRow:
@@ -402,7 +226,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                     cell.textLabel.text = kRangingOperationTitle;
                     self.rangingSwitch = (UISwitch *)cell.accessoryView;
                     [self.rangingSwitch addTarget:self
-                                           action:@selector(changeRangingState:)
+                                           action:@selector(rangingSwitchChanged:)
                                  forControlEvents:UIControlEventValueChanged];
                     break;
             }
@@ -410,7 +234,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
             break;
         case NTDetectedBeaconsSection:
         default: {
-            CLBeacon *beacon = self.detectedBeacons[indexPath.row];
+            CBPeripheral *tempPeripheral = self.detectedPeripherals[indexPath.row];
             
             cell = [tableView dequeueReusableCellWithIdentifier:kBeaconCellIdentifier];
             
@@ -418,14 +242,24 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
                                               reuseIdentifier:kBeaconCellIdentifier];
             
-            cell.textLabel.text = beacon.proximityUUID.UUIDString;
-            cell.detailTextLabel.text = [self detailsStringForBeacon:beacon];
+            cell.textLabel.text = self.hostName;
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@",tempPeripheral.identifier];
             cell.detailTextLabel.textColor = [UIColor grayColor];
         }
             break;
     }
     
     return cell;
+}
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 0 || [[alertView textFieldAtIndex:0].text  isEqual: @""]){
+        self.advertisingSwitch.on = NO;
+    }
+    else{
+        self.hostName = [alertView textFieldAtIndex:0].text;
+    }
+    
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -444,7 +278,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
             return kNumberOfAvailableOperations;
         case NTDetectedBeaconsSection:
         default:
-            return self.detectedBeacons.count;
+            return [self.detectedPeripherals count];
     }
 }
 
@@ -486,4 +320,486 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     
     return headerView;
 }
+
+///////////////////////Central Methods
+/** centralManagerDidUpdateState is a required protocol method.
+ *  Usually, you'd check for other states to make sure the current device supports LE, is powered on, etc.
+ *  In this instance, we're just using it to wait for CBCentralManagerStatePoweredOn, which indicates
+ *  the Central is ready to be used.
+ */
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central
+{
+    if (central.state != CBCentralManagerStatePoweredOn) {
+        // In a real app, you'd deal with all the states correctly
+        return;
+    }
+    
+    // The state must be CBCentralManagerStatePoweredOn...
+    
+    // ... so start scanning
+    [self scan];
+    
+}
+
+-(void)foundPeripherals
+{
+    
+    if ([self.detectedPeripherals count] == 0) {
+        NSLog(@"No beacons found nearby.");
+    } else {
+        NSLog(@"Found %lu %@.", (unsigned long)[self.detectedPeripherals count],
+              [self.detectedPeripherals count] > 1 ? @"Hosts" : @"Host");
+    }
+    
+    NSIndexSet *insertedSections = [self insertedSections];
+    NSIndexSet *deletedSections = [self deletedSections];
+    NSArray *deletedRows = [self indexPathsOfRemovedPeripherals:self.detectedPeripherals];
+    NSArray *insertedRows = [self indexPathsOfInsertedPeripherals:self.detectedPeripherals];
+    NSArray *reloadedRows = nil;
+    if (!deletedRows && !insertedRows)
+        reloadedRows = [self indexPathsForPeripherals:self.detectedPeripherals];
+    
+    [self.peripheralView beginUpdates];
+    if (insertedSections)
+        [self.peripheralView insertSections:insertedSections withRowAnimation:UITableViewRowAnimationFade];
+    if (deletedSections)
+        [self.peripheralView deleteSections:deletedSections withRowAnimation:UITableViewRowAnimationFade];
+    if (insertedRows)
+        [self.peripheralView insertRowsAtIndexPaths:insertedRows withRowAnimation:UITableViewRowAnimationFade];
+    if (deletedRows)
+        [self.peripheralView deleteRowsAtIndexPaths:deletedRows withRowAnimation:UITableViewRowAnimationFade];
+    if (reloadedRows)
+        [self.peripheralView reloadRowsAtIndexPaths:reloadedRows withRowAnimation:UITableViewRowAnimationNone];
+    [self.peripheralView endUpdates];
+}
+
+
+/** Scan for peripherals - specifically for our service's 128bit CBUUID
+ */
+- (void)scan
+{
+    [self.centralManager scanForPeripheralsWithServices:@[[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]]
+                                                options:@{ CBCentralManagerScanOptionAllowDuplicatesKey : @YES }];
+    [self foundPeripherals];
+    NSLog(@"Scanning started");
+}
+
+/** This callback comes whenever a peripheral that is advertising the TRANSFER_SERVICE_UUID is discovered.
+ *  We check the RSSI, to make sure it's close enough that we're interested in it, and if it is,
+ *  we start the connection process
+ */
+- (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
+{
+    // Reject any where the value is above reasonable range
+    if (RSSI.integerValue > -15) {
+        return;
+    }
+    
+    // Reject if the signal strength is too low to be close enough (Close is around -22dB)
+    if (RSSI.integerValue < -35) {
+        return;
+    }
+    
+    NSLog(@"Discovered %@ at %@", peripheral.name, RSSI);
+    
+    // Ok, it's in range - have we already seen it?
+    if (self.discoveredPeripheral != peripheral) {
+        
+        // Save a local copy of the peripheral, so CoreBluetooth doesn't get rid of it
+        self.discoveredPeripheral = peripheral;
+        
+        /*// And connect
+        NSLog(@"Connecting to peripheral %@", peripheral);
+        [self.centralManager connectPeripheral:peripheral options:nil];*/
+        [self.detectedPeripherals addObject:peripheral];
+        [self foundPeripherals];
+    }
+}
+
+
+/** If the connection fails for whatever reason, we need to deal with it.
+ */
+- (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error
+{
+    NSLog(@"Failed to connect to %@. (%@)", peripheral, [error localizedDescription]);
+    [self cleanup];
+}
+
+
+/** We've connected to the peripheral, now we need to discover the services and characteristics to find the 'transfer' characteristic.
+ */
+- (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
+{
+    NSLog(@"Peripheral Connected");
+    
+    // Stop scanning
+    [self.centralManager stopScan];
+    NSLog(@"Scanning stopped");
+    
+    // Clear the data that we may already have
+    [self.data setLength:0];
+    
+    // Make sure we get the discovery callbacks
+    peripheral.delegate = self;
+    
+    // Search only for services that match our UUID
+    [peripheral discoverServices:@[[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]]];
+}
+
+
+/** The Transfer Service was discovered
+ */
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error
+{
+    if (error) {
+        NSLog(@"Error discovering services: %@", [error localizedDescription]);
+        [self cleanup];
+        return;
+    }
+    
+    // Discover the characteristic we want...
+    
+    // Loop through the newly filled peripheral.services array, just in case there's more than one.
+    for (CBService *service in peripheral.services) {
+        [peripheral discoverCharacteristics:@[[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_UUID]] forService:service];
+    }
+}
+
+
+/** The Transfer characteristic was discovered.
+ *  Once this has been found, we want to subscribe to it, which lets the peripheral know we want the data it contains
+ */
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error
+{
+    // Deal with errors (if any)
+    if (error) {
+        NSLog(@"Error discovering characteristics: %@", [error localizedDescription]);
+        [self cleanup];
+        return;
+    }
+    
+    // Again, we loop through the array, just in case.
+    for (CBCharacteristic *characteristic in service.characteristics) {
+        
+        // And check if it's the right one
+        if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_UUID]]) {
+            
+            // If it is, subscribe to it
+            [peripheral setNotifyValue:YES forCharacteristic:characteristic];
+        }
+        else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_ITUNES_UUID]]) {
+            
+            // If it is, subscribe to it
+            [peripheral setNotifyValue:YES forCharacteristic:characteristic];
+        }
+    }
+    
+    // Once this is complete, we just need to wait for the data to come in.
+}
+
+
+/** This callback lets us know more data has arrived via notification on the characteristic
+ */
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
+{
+    if (error) {
+        NSLog(@"Error discovering characteristics: %@", [error localizedDescription]);
+        return;
+    }
+    
+    NSString *stringFromData = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];
+    
+    // Have we got everything we need?
+    if ([stringFromData isEqualToString:@"EOM"]) {
+        NSData *data = characteristic.value;
+        NSMutableArray *newData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        UINavigationController *navBar = self.tabBarController.viewControllers[1];
+        QueueTableViewController *qtvc = navBar.viewControllers[0];
+        for(int i = 0; i < newData.count; i++){
+            SongStruct *song = newData[i];
+            if([qtvc.addedSongs objectForKey:song.strIdentifier] == nil){
+                [qtvc.addedSongs setObject:song forKey:song.strIdentifier];
+            }
+            else{
+                SongStruct *temp = [qtvc.addedSongs objectForKey:song.strIdentifier];
+                if(song.votes > temp.votes){
+                    [temp Vote];
+                }
+            }
+        }
+    }
+    else{
+        // Otherwise, just add the data on to what we already have
+        [self.data appendData:characteristic.value];
+    }
+    
+    
+}
+
+
+/** The peripheral letting us know whether our subscribe/unsubscribe happened or not
+ */
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
+{
+    if (error) {
+        NSLog(@"Error changing notification state: %@", error.localizedDescription);
+    }
+    
+    // Exit if it's not the transfer characteristic.. We dont care about Itunes library change
+    if (![characteristic.UUID isEqual:[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_UUID]]) {
+        return;
+    }
+    
+    // Notification has started
+    if (characteristic.isNotifying) {
+        NSLog(@"Notification began on %@", characteristic);
+    }
+    
+    // Notification has stopped
+    else {
+        // so disconnect from the peripheral
+        NSLog(@"Notification stopped on %@.  Disconnecting", characteristic);
+        [self.centralManager cancelPeripheralConnection:peripheral];
+    }
+}
+
+
+
+
+/** Once the disconnection happens, we need to clean up our local copy of the peripheral
+ */
+- (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error
+{
+    NSLog(@"Peripheral Disconnected");
+    self.discoveredPeripheral = nil;
+    
+    // We're disconnected, so start scanning again
+    [self scan];
+}
+
+
+/** Call this when things either go wrong, or you're done with the connection.
+ *  This cancels any subscriptions if there are any, or straight disconnects if not.
+ *  (didUpdateNotificationStateForCharacteristic will cancel the connection if a subscription is involved)
+ */
+- (void)cleanup
+{
+    // Don't do anything if we're not connected
+    if (!self.discoveredPeripheral.isConnected) { //deprecated. Needs fixing
+        return;
+    }
+    
+    // See if we are subscribed to a characteristic on the peripheral
+    if (self.discoveredPeripheral.services != nil) {
+        for (CBService *service in self.discoveredPeripheral.services) {
+            if (service.characteristics != nil) {
+                for (CBCharacteristic *characteristic in service.characteristics) {
+                    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_UUID]]) {
+                        if (characteristic.isNotifying) {
+                            // It is notifying, so unsubscribe
+                            [self.discoveredPeripheral setNotifyValue:NO forCharacteristic:characteristic];
+                            
+                            // And we're done.
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // If we've got this far, we're connected, but we're not subscribed, so we just disconnect
+    [self.centralManager cancelPeripheralConnection:self.discoveredPeripheral];
+}
+////////////////////////////End Central Methods
+
+
+//<------------------------Peripheral Methods-------------->
+/** Required protocol method.  A full app should take care of all the possible states,
+ *  but we're just waiting for  to know when the CBPeripheralManager is ready
+ */
+- (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral
+{
+    // Opt out from any other state
+    if (peripheral.state != CBPeripheralManagerStatePoweredOn) {
+        return;
+    }
+    
+    // We're in CBPeripheralManagerStatePoweredOn state...
+    NSLog(@"self.peripheralManager powered on.");
+    
+    // ... so build our service.
+    
+    // Start with the CBMutableCharacteristic
+    self.transferCharacteristicData = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_UUID]
+                                                                     properties:CBCharacteristicPropertyNotify
+                                                                          value:nil
+                                                                    permissions:CBAttributePermissionsWriteable];
+    
+    // Then the service
+    CBMutableService *transferServiceData = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]
+                                                                       primary:YES];
+    
+    self.transferCharacteristicLibrary = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:TRANSFER_CHARACTERISTIC_ITUNES_UUID]
+                                                                         properties:CBCharacteristicPropertyNotify
+                                                                              value:nil
+                                                                        permissions:CBAttributePermissionsReadable];
+    
+
+    
+    
+    // Add the characteristics to the service
+    transferServiceData.characteristics = @[self.transferCharacteristicData, self.transferCharacteristicLibrary];
+    
+    // And add it to the peripheral manager
+    [self.peripheralManager addService:transferServiceData];
+    
+    
+}
+
+
+/** Catch when someone subscribes to our characteristic, then start sending them data
+ */
+- (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic
+{
+    NSLog(@"Central subscribed to characteristic");
+    
+    if([characteristic.UUID  isEqual: TRANSFER_CHARACTERISTIC_UUID]){
+        // Get the data
+        UINavigationController *navBar = self.tabBarController.viewControllers[1];
+        QueueTableViewController *qtvc = navBar.viewControllers[0];
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:qtvc.addedSongs];
+        self.dataToSend = data;
+    
+        // Reset the index
+        self.sendDataIndex = 0;
+    
+        // Start sending
+        [self sendData];
+    }
+    else{
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.myLibrary];
+        self.dataToSend = data;
+        
+        // Reset the index
+        self.sendDataIndex = 0;
+        
+        // Start sending
+        [self sendData];
+
+           
+    }
+}
+
+
+/** Recognise when the central unsubscribes
+ */
+- (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didUnsubscribeFromCharacteristic:(CBCharacteristic *)characteristic
+{
+    NSLog(@"Central unsubscribed from characteristic");
+}
+
+
+/** Sends the next amount of data to the connected central
+ */
+- (void)sendData
+{
+    // First up, check if we're meant to be sending an EOM
+    static BOOL sendingEOM = NO;
+    
+    if (sendingEOM) {
+        
+        // send it
+        BOOL didSend = [self.peripheralManager updateValue:[@"EOM" dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:self.transferCharacteristic onSubscribedCentrals:nil];
+        
+        // Did it send?
+        if (didSend) {
+            
+            // It did, so mark it as sent
+            sendingEOM = NO;
+            
+            NSLog(@"Sent: EOM");
+        }
+        
+        // It didn't send, so we'll exit and wait for peripheralManagerIsReadyToUpdateSubscribers to call sendData again
+        return;
+    }
+    
+    // We're not sending an EOM, so we're sending data
+    
+    // Is there any left to send?
+    
+    if (self.sendDataIndex >= self.dataToSend.length) {
+        
+        // No data left.  Do nothing
+        return;
+    }
+    
+    // There's data left, so send until the callback fails, or we're done.
+    
+    BOOL didSend = YES;
+    
+    while (didSend) {
+        
+        // Make the next chunk
+        
+        // Work out how big it should be
+        NSInteger amountToSend = self.dataToSend.length - self.sendDataIndex;
+        
+        // Can't be longer than 20 bytes
+        if (amountToSend > NOTIFY_MTU) amountToSend = NOTIFY_MTU;
+        
+        // Copy out the data we want
+        NSData *chunk = [NSData dataWithBytes:self.dataToSend.bytes+self.sendDataIndex length:amountToSend];
+        
+        // Send it
+        didSend = [self.peripheralManager updateValue:chunk forCharacteristic:self.transferCharacteristic onSubscribedCentrals:nil];
+        
+        // If it didn't work, drop out and wait for the callback
+        if (!didSend) {
+            return;
+        }
+        
+        
+        // It did send, so update our index
+        self.sendDataIndex += amountToSend;
+        
+        // Was it the last one?
+        if (self.sendDataIndex >= self.dataToSend.length) {
+            
+            // It was - send an EOM
+            
+            // Set this so if the send fails, we'll send it next time
+            sendingEOM = YES;
+            
+            // Send it
+            BOOL eomSent = [self.peripheralManager updateValue:[@"EOM" dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:self.transferCharacteristic onSubscribedCentrals:nil];
+            
+            if (eomSent) {
+                // It sent, we're all done
+                sendingEOM = NO;
+                
+                NSLog(@"Sent: EOM");
+            }
+            
+            return;
+        }
+    }
+}
+
+
+/** This callback comes in when the PeripheralManager is ready to send the next chunk of data.
+ *  This is to ensure that packets will arrive in the order they are sent
+ */
+- (void)peripheralManagerIsReadyToUpdateSubscribers:(CBPeripheralManager *)peripheral
+{
+    // Start sending again
+    [self sendData];
+}
+
+#pragma mark - Switch Methods
+
+//<-------------End peripheral methods----------->
+
+
 @end

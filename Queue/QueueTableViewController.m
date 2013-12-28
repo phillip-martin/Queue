@@ -8,6 +8,8 @@
 
 #import "QueueTableViewController.h"
 #import "QueueViewController.h"
+#import "BTLEViewController.h"
+#import "SongStruct.h"
 
 @implementation QueueTableViewController
 
@@ -18,22 +20,37 @@
 
 - (IBAction) addHandler {
     
-	MPMediaPickerController *mediaPicker =
-    [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
+    UINavigationController *navBar = self.tabBarController.viewControllers[2];
+    BTLEViewController *btController = navBar.viewControllers[0];
+    
+    if(btController.rangingSwitch.state == NO){
+        MPMediaPickerController *mediaPicker =
+        [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
 	
-	mediaPicker.delegate = self;
-	mediaPicker.allowsPickingMultipleItems = YES;
-	mediaPicker.prompt = NSLocalizedString (@"Add a song to the queue", @"Choose a song to add to the queue");
+        mediaPicker.delegate = self;
+        mediaPicker.allowsPickingMultipleItems = YES;
+        mediaPicker.prompt = NSLocalizedString (@"Add a song to the queue", @"Choose a song to add to the queue");
 
     
-    if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
-        [self presentViewController:mediaPicker animated:YES completion:nil];
-    } else {
-        [self presentModalViewController:mediaPicker animated:YES];
+        if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
+            [self presentViewController:mediaPicker animated:YES completion:nil];
+        } else {
+            [self presentModalViewController:mediaPicker animated:YES];
+        }
     }
     
-    
+    else{
+        
+    }
 
+}
+
+-(void)upVote:(id)sender{
+    UIButton *tempButton = (UIButton *)sender;
+    SongStruct *temp = [self.songArray objectAtIndex:tempButton.tag];
+    [temp Vote];
+    [tempButton setEnabled:NO]; //not working
+    [self.currentQueue reloadData];
 }
 
 - (void)viewDidLoad
@@ -42,6 +59,7 @@
     
     self.currentQueue.dataSource = self;
     self.currentQueue.delegate = self;
+    self.addedSongs = [[NSMutableDictionary alloc] init];
 }
 
 
@@ -65,9 +83,22 @@
     UINavigationController *navBar = self.tabBarController.viewControllers[0];
     QueueViewController *mainView = navBar.viewControllers[0];
 	[mainView updatePlayerQueueWithMediaCollection: mediaItemCollection];
+    for (int i = 0; i<mediaItemCollection.items.count; i++) {
+        NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyTitle],@"title")];
+        NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyArtist],@"artist")];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1];
+        NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
+        if([self.addedSongs objectForKey:tempID] == nil){
+            [self.addedSongs setObject:newSong forKey:tempID];
+        }
+        else{
+            SongStruct *temp = [self.addedSongs objectForKey:tempID];
+            [temp Vote];
+        }
+    }
+    self.songArray = [self.addedSongs allValues];
 	[self.currentQueue reloadData];
     
-	//[[UIApplication sharedApplication] setStatusBarStyle: UIStatusBarStyleDefault animated:YES];
 }
 
 -(void) mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker{
@@ -82,10 +113,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    UINavigationController *navBar = self.tabBarController.viewControllers[0];
-    QueueViewController *mainView = navBar.viewControllers[0];
-    MPMediaItemCollection *songs  = mainView.songQueue;
-    return [songs.items count];
+    return [self.addedSongs count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -94,20 +122,52 @@
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 
-    UINavigationController *navBar = self.tabBarController.viewControllers[0];
-    QueueViewController *mainView = navBar.viewControllers[0];
-    MPMediaItemCollection *songs  = mainView.songQueue;
-	MPMediaItem *anItem = (MPMediaItem *)[songs.items objectAtIndex: [indexPath row]];
-    NSLog(@"%ul", [songs.items count]);
+    UILabel *titleLabel;
+    UILabel *artistLabel;
+    UIButton *sideButton;
+    UILabel *votesLabel;
+    SongStruct *anItem = (SongStruct *)[self.songArray objectAtIndex:[indexPath row]];
     
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                       reuseIdentifier:CellIdentifier];
     }
+    for(UIView *view in cell.contentView.subviews){
+        if ([view isKindOfClass:[UIView class]]) {
+            [view removeFromSuperview];
+        }
+    }
+	titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 7.5, 230.0, 20)];
+    titleLabel.font = [UIFont systemFontOfSize:17.0];
+    titleLabel.textAlignment = NSTextAlignmentLeft;
+    titleLabel.textColor = [UIColor blackColor];
+    titleLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+    [cell.contentView addSubview:titleLabel];
     
-	
-    cell.textLabel.text = [anItem valueForProperty:MPMediaItemPropertyTitle];
-    cell.detailTextLabel.text = [anItem valueForProperty:MPMediaItemPropertyArtist];
+    artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 30.0, 230.0, 25.0)];
+    artistLabel.font = [UIFont systemFontOfSize:12.0];
+    artistLabel.textAlignment = NSTextAlignmentLeft;
+    artistLabel.textColor = [UIColor darkGrayColor];
+    artistLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+    [cell.contentView addSubview:artistLabel];
+    
+    votesLabel = [[UILabel alloc] initWithFrame:CGRectMake(255.0, 30.0, 55.0, 25.0)];
+    votesLabel.font = [UIFont systemFontOfSize:12.0];
+    votesLabel.textAlignment = NSTextAlignmentLeft;
+    votesLabel.textColor = [UIColor darkGrayColor];
+    [cell.contentView addSubview:votesLabel];
+    
+    
+    sideButton = [[UIButton alloc] initWithFrame:CGRectMake(255.0, 20.0, 55.0, 15.0)];
+    [sideButton addTarget:self action:@selector(upVote:) forControlEvents:UIControlEventTouchUpInside];
+    [sideButton setTag:[indexPath row]];
+    [sideButton setTitle:@"Vote" forState:UIControlStateNormal];
+    [sideButton setBackgroundColor:[UIColor blackColor]];
+    [cell.contentView addSubview:sideButton];
+    [titleLabel setText: anItem.title];
+    [artistLabel setText:anItem.artist];
+    NSString *tempLabel = anItem.votes > 1 ? @"Votes":@"Vote";
+    [votesLabel setText:[NSString stringWithFormat:@"%lu %@",(unsigned long)anItem.votes,tempLabel]];
     
 	[tableView deselectRowAtIndexPath: indexPath animated: YES];
     return cell;

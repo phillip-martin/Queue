@@ -17,7 +17,9 @@
 }
 
 @property (nonatomic) UITableView *currentQueue;
+@property (nonatomic) NSMutableDictionary *addedSongs;
 @property (nonatomic) UIBarButtonItem *addMusicButton;
+@property (nonatomic) NSArray *songArray;
 
 
 @end

@@ -2,24 +2,28 @@
 //  BTLEViewController.h
 //  Queue
 //
-//  Created by Ethan on 12/22/13.
+//  Created by Ethan on 12/26/13.
 //  Copyright (c) 2013 Ethan. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
-
-@import CoreLocation;
 @import CoreBluetooth;
 
-@interface BTLEViewController : UIViewController<CBPeripheralManagerDelegate, CLLocationManagerDelegate, UITableViewDataSource, UITableViewDelegate>
+@interface BTLEViewController : UIViewController <UITableViewDataSource, UITableViewDelegate, CBCentralManagerDelegate, CBPeripheralManagerDelegate, CBPeripheralDelegate>
 
-@property (nonatomic, strong) CLBeaconRegion *beaconRegion;
-@property (nonatomic, weak) IBOutlet UITableView *beaconTableView;
-@property (nonatomic) CLLocationManager *locationManager;
-@property (nonatomic) NSArray *detectedBeacons;
+@property (nonatomic) UISwitch *advertisingSwitch;
+@property (nonatomic) UISwitch *rangingSwitch;
+@property (nonatomic) UITableView *peripheralView;
 @property (nonatomic) CBPeripheralManager *peripheralManager;
-@property (nonatomic, weak) UISwitch *advertisingSwitch;
-@property (nonatomic, weak) UISwitch *rangingSwitch;
-
+@property (nonatomic) CBCentralManager *centralManager;
+@property (nonatomic) CBMutableCharacteristic *transferCharacteristicData;
+@property (nonatomic) CBMutableCharacteristic *transferCharacteristicLibrary;
+@property (nonatomic) NSData *dataToSend;
+@property (nonatomic, readwrite) NSInteger sendDataIndex;
+@property (nonatomic) CBPeripheral *discoveredPeripheral;
+@property (nonatomic) NSMutableData *data;
+@property (nonatomic) NSMutableDictionary *myLibrary;
+@property (nonatomic) NSMutableArray *detectedPeripherals;
+@property (nonatomic) NSString *hostName;
 
 @end

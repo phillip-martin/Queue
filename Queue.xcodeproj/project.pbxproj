@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA595C9E186D287300426227 /* BTLEViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA595C9D186D287300426227 /* BTLEViewController.m */; };
+		AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */ = {isa = PBXBuildFile; fileRef = AA595CA3186D3E0B00426227 /* SongStruct.m */; };
+		AA595CAB186DAE4700426227 /* Mobile_Signal.png in Resources */ = {isa = PBXBuildFile; fileRef = AA595CAA186DAE4700426227 /* Mobile_Signal.png */; };
 		AA87037818626EB00062A25C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA87037718626EB00062A25C /* Foundation.framework */; };
 		AA87037A18626EB00062A25C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA87037918626EB00062A25C /* CoreGraphics.framework */; };
 		AA87037C18626EB00062A25C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA87037B18626EB00062A25C /* UIKit.framework */; };
@@ -31,9 +34,6 @@
 		AA8703C51862A6BE0062A25C /* QueueTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA8703C41862A6BE0062A25C /* QueueTableViewController.m */; };
 		AA8703CD1862D1200062A25C /* background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = AA8703CC1862D1200062A25C /* background.jpg */; };
 		AABFC8051863165500AF22B4 /* no_artwork.png in Resources */ = {isa = PBXBuildFile; fileRef = AABFC8041863165500AF22B4 /* no_artwork.png */; };
-		AAE895791867BAA900E55A95 /* BTLEViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAE895781867BAA900E55A95 /* BTLEViewController.m */; };
-		AAE8957C1867BBD700E55A95 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */; };
-		AAE8957D1867BBD700E55A95 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAE8957B1867BBD700E55A95 /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +47,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA595C9C186D287300426227 /* BTLEViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTLEViewController.h; sourceTree = "<group>"; };
+		AA595C9D186D287300426227 /* BTLEViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTLEViewController.m; sourceTree = "<group>"; };
+		AA595CA2186D3E0B00426227 /* SongStruct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SongStruct.h; sourceTree = "<group>"; };
+		AA595CA3186D3E0B00426227 /* SongStruct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SongStruct.m; sourceTree = "<group>"; };
+		AA595CAA186DAE4700426227 /* Mobile_Signal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Mobile_Signal.png; sourceTree = "<group>"; };
 		AA87037418626EB00062A25C /* Queue.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Queue.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87037718626EB00062A25C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		AA87037918626EB00062A25C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -77,8 +82,6 @@
 		AA8703C41862A6BE0062A25C /* QueueTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QueueTableViewController.m; sourceTree = "<group>"; };
 		AA8703CC1862D1200062A25C /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = background.jpg; sourceTree = "<group>"; };
 		AABFC8041863165500AF22B4 /* no_artwork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = no_artwork.png; sourceTree = "<group>"; };
-		AAE895771867BAA900E55A95 /* BTLEViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTLEViewController.h; sourceTree = "<group>"; };
-		AAE895781867BAA900E55A95 /* BTLEViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTLEViewController.m; sourceTree = "<group>"; };
 		AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		AAE8957B1867BBD700E55A95 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -88,8 +91,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAE8957C1867BBD700E55A95 /* CoreBluetooth.framework in Frameworks */,
-				AAE8957D1867BBD700E55A95 /* CoreLocation.framework in Frameworks */,
 				AA8703C2186282460062A25C /* AVFoundation.framework in Frameworks */,
 				AA8703C0186282400062A25C /* AudioToolbox.framework in Frameworks */,
 				AA8703BB18627A550062A25C /* MediaPlayer.framework in Frameworks */,
@@ -150,17 +151,19 @@
 		AA87037D18626EB00062A25C /* Queue */ = {
 			isa = PBXGroup;
 			children = (
+				AA595C9C186D287300426227 /* BTLEViewController.h */,
+				AA595C9D186D287300426227 /* BTLEViewController.m */,
 				AA87038618626EB00062A25C /* QueueAppDelegate.h */,
 				AA87038718626EB00062A25C /* QueueAppDelegate.m */,
 				AA87038918626EB00062A25C /* Main.storyboard */,
-				AAE895771867BAA900E55A95 /* BTLEViewController.h */,
-				AAE895781867BAA900E55A95 /* BTLEViewController.m */,
 				AA87038C18626EB00062A25C /* QueueViewController.h */,
 				AA87038D18626EB00062A25C /* QueueViewController.m */,
 				AA8703C31862A6BE0062A25C /* QueueTableViewController.h */,
 				AA8703C41862A6BE0062A25C /* QueueTableViewController.m */,
 				AA87038F18626EB00062A25C /* Images.xcassets */,
 				AA87037E18626EB00062A25C /* Supporting Files */,
+				AA595CA2186D3E0B00426227 /* SongStruct.h */,
+				AA595CA3186D3E0B00426227 /* SongStruct.m */,
 			);
 			path = Queue;
 			sourceTree = "<group>";
@@ -168,6 +171,7 @@
 		AA87037E18626EB00062A25C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				AA595CAA186DAE4700426227 /* Mobile_Signal.png */,
 				AABFC8041863165500AF22B4 /* no_artwork.png */,
 				AA8703CC1862D1200062A25C /* background.jpg */,
 				AA8703B21862756E0062A25C /* pause_button.png */,
@@ -283,6 +287,7 @@
 				AABFC8051863165500AF22B4 /* no_artwork.png in Resources */,
 				AA8703B91862756E0062A25C /* play_button@2x.png in Resources */,
 				AA87039018626EB00062A25C /* Images.xcassets in Resources */,
+				AA595CAB186DAE4700426227 /* Mobile_Signal.png in Resources */,
 				AA8703CD1862D1200062A25C /* background.jpg in Resources */,
 				AA87038218626EB00062A25C /* InfoPlist.strings in Resources */,
 				AA87038B18626EB00062A25C /* Main.storyboard in Resources */,
@@ -304,8 +309,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAE895791867BAA900E55A95 /* BTLEViewController.m in Sources */,
 				AA87038E18626EB00062A25C /* QueueViewController.m in Sources */,
+				AA595C9E186D287300426227 /* BTLEViewController.m in Sources */,
+				AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */,
 				AA8703C51862A6BE0062A25C /* QueueTableViewController.m in Sources */,
 				AA87038818626EB00062A25C /* QueueAppDelegate.m in Sources */,
 				AA87038418626EB00062A25C /* main.m in Sources */,
