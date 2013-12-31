@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA45FE951871FC700094F0EC /* LibraryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FE941871FC700094F0EC /* LibraryViewController.m */; };
+		AA45FE9818720BAB0094F0EC /* LeCentral.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FE9718720BAB0094F0EC /* LeCentral.m */; };
+		AA45FE9B18721B620094F0EC /* LePeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FE9A18721B620094F0EC /* LePeripheral.m */; };
 		AA595C9E186D287300426227 /* BTLEViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA595C9D186D287300426227 /* BTLEViewController.m */; };
 		AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */ = {isa = PBXBuildFile; fileRef = AA595CA3186D3E0B00426227 /* SongStruct.m */; };
 		AA595CAB186DAE4700426227 /* Mobile_Signal.png in Resources */ = {isa = PBXBuildFile; fileRef = AA595CAA186DAE4700426227 /* Mobile_Signal.png */; };
@@ -47,6 +50,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA45FE931871FC700094F0EC /* LibraryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibraryViewController.h; sourceTree = "<group>"; };
+		AA45FE941871FC700094F0EC /* LibraryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibraryViewController.m; sourceTree = "<group>"; };
+		AA45FE9618720BAB0094F0EC /* LeCentral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeCentral.h; sourceTree = "<group>"; };
+		AA45FE9718720BAB0094F0EC /* LeCentral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeCentral.m; sourceTree = "<group>"; };
+		AA45FE9918721B620094F0EC /* LePeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LePeripheral.h; sourceTree = "<group>"; };
+		AA45FE9A18721B620094F0EC /* LePeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LePeripheral.m; sourceTree = "<group>"; };
 		AA595C9C186D287300426227 /* BTLEViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTLEViewController.h; sourceTree = "<group>"; };
 		AA595C9D186D287300426227 /* BTLEViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTLEViewController.m; sourceTree = "<group>"; };
 		AA595CA2186D3E0B00426227 /* SongStruct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SongStruct.h; sourceTree = "<group>"; };
@@ -83,7 +92,6 @@
 		AA8703CC1862D1200062A25C /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = background.jpg; sourceTree = "<group>"; };
 		AABFC8041863165500AF22B4 /* no_artwork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = no_artwork.png; sourceTree = "<group>"; };
 		AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
-		AAE8957B1867BBD700E55A95 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,7 +144,6 @@
 			isa = PBXGroup;
 			children = (
 				AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */,
-				AAE8957B1867BBD700E55A95 /* CoreLocation.framework */,
 				AA8703C1186282460062A25C /* AVFoundation.framework */,
 				AA8703BF186282400062A25C /* AudioToolbox.framework */,
 				AA8703BA18627A550062A25C /* MediaPlayer.framework */,
@@ -151,6 +158,10 @@
 		AA87037D18626EB00062A25C /* Queue */ = {
 			isa = PBXGroup;
 			children = (
+				AA45FE9618720BAB0094F0EC /* LeCentral.h */,
+				AA45FE9718720BAB0094F0EC /* LeCentral.m */,
+				AA45FE9918721B620094F0EC /* LePeripheral.h */,
+				AA45FE9A18721B620094F0EC /* LePeripheral.m */,
 				AA595C9C186D287300426227 /* BTLEViewController.h */,
 				AA595C9D186D287300426227 /* BTLEViewController.m */,
 				AA87038618626EB00062A25C /* QueueAppDelegate.h */,
@@ -160,6 +171,8 @@
 				AA87038D18626EB00062A25C /* QueueViewController.m */,
 				AA8703C31862A6BE0062A25C /* QueueTableViewController.h */,
 				AA8703C41862A6BE0062A25C /* QueueTableViewController.m */,
+				AA45FE931871FC700094F0EC /* LibraryViewController.h */,
+				AA45FE941871FC700094F0EC /* LibraryViewController.m */,
 				AA87038F18626EB00062A25C /* Images.xcassets */,
 				AA87037E18626EB00062A25C /* Supporting Files */,
 				AA595CA2186D3E0B00426227 /* SongStruct.h */,
@@ -309,7 +322,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA45FE9818720BAB0094F0EC /* LeCentral.m in Sources */,
 				AA87038E18626EB00062A25C /* QueueViewController.m in Sources */,
+				AA45FE9B18721B620094F0EC /* LePeripheral.m in Sources */,
+				AA45FE951871FC700094F0EC /* LibraryViewController.m in Sources */,
 				AA595C9E186D287300426227 /* BTLEViewController.m in Sources */,
 				AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */,
 				AA8703C51862A6BE0062A25C /* QueueTableViewController.m in Sources */,

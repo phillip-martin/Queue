@@ -7,8 +7,9 @@
 //
 
 #import <MediaPlayer/MediaPlayer.h>
+#import "LibraryViewController.h"
 
-@interface QueueTableViewController : UITableViewController < MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource>
+@interface QueueTableViewController : UITableViewController < MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource, LibraryViewControllerDelegate>
 {
     IBOutlet UITableView *currentQueue;
     //IBOutlet UIBarButtonItem *songInfo; Do we want this? for voting?
@@ -21,6 +22,8 @@
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 @property (nonatomic) NSArray *songArray;
 
++(id)sharedInstance;
+-(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSMutableArray *)songs;
 
 @end
 

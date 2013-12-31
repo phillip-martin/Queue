@@ -7,23 +7,24 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "LeCentral.h"
+#import "LePeripheral.h"
 @import CoreBluetooth;
 
-@interface BTLEViewController : UIViewController <UITableViewDataSource, UITableViewDelegate, CBCentralManagerDelegate, CBPeripheralManagerDelegate, CBPeripheralDelegate>
+@interface BTLEViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate,LeCentral>
 
 @property (nonatomic) UISwitch *advertisingSwitch;
 @property (nonatomic) UISwitch *rangingSwitch;
-@property (nonatomic) UITableView *peripheralView;
-@property (nonatomic) CBPeripheralManager *peripheralManager;
-@property (nonatomic) CBCentralManager *centralManager;
-@property (nonatomic) CBMutableCharacteristic *transferCharacteristicData;
-@property (nonatomic) CBMutableCharacteristic *transferCharacteristicLibrary;
-@property (nonatomic) NSData *dataToSend;
-@property (nonatomic, readwrite) NSInteger sendDataIndex;
-@property (nonatomic) CBPeripheral *discoveredPeripheral;
-@property (nonatomic) NSMutableData *data;
-@property (nonatomic) NSMutableDictionary *myLibrary;
+@property (nonatomic) IBOutlet UILabel *statusLabel;
+@property (nonatomic) LePeripheral *peripheralManager;
+@property (nonatomic) LeCentral *centralManager;
+//@property (nonatomic) CBMutableCharacteristic *transferCharacteristicData;
+//@property (nonatomic) CBMutableCharacteristic *transferCharacteristicLibrary;
 @property (nonatomic) NSMutableArray *detectedPeripherals;
 @property (nonatomic) NSString *hostName;
+@property (nonatomic) NSDictionary *myLibrary;
+
+-(NSMutableArray *)songsToArray;
++(id)sharedInstance;
 
 @end

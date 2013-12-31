@@ -42,13 +42,14 @@
 @property (nonatomic) IBOutlet UILabel *artistLabel;
 @property (nonatomic) IBOutlet UIBarButtonItem *pausePlay;
 @property (nonatomic) IBOutlet UISlider *songProgress;
+@property (nonatomic) NSMutableDictionary *myLibrary;
 @property (readwrite) BOOL playing;
 @property (readwrite) BOOL interruptedOnPlayback;
 
 
 -(IBAction)pauseOrPlayMusic :(id)sender;
 - (void) updatePlayerQueueWithMediaCollection: (MPMediaItemCollection *) mediaItemCollection;
-
++(id)sharedInstance;
 
 @end
 

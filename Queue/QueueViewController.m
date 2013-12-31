@@ -7,6 +7,8 @@
 //
 
 #import "QueueViewController.h"
+#import "SongStruct.h"
+#import "BTLEViewController.h"
 #import <MediaPlayer/MediaPlayer.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -103,6 +105,7 @@ void audioRouteChangeListenerCallback (
 @synthesize songProgress;
 @synthesize playing;
 @synthesize interruptedOnPlayback;
+@synthesize myLibrary;
 
 
 -(id)init
@@ -143,6 +146,19 @@ void audioRouteChangeListenerCallback (
     }
 }
 
++(id)sharedInstance{
+    static QueueViewController *controller;
+    
+    @synchronized(self)
+    {
+        if (controller == NULL)
+            controller = [[self alloc] init];
+    }
+    
+    
+    return controller;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -165,7 +181,21 @@ void audioRouteChangeListenerCallback (
     //		of the built-in iPod app. Here they are both turned off.
     [mainPlayer setShuffleMode: MPMusicShuffleModeOff];
     [mainPlayer setRepeatMode: MPMusicRepeatModeNone];
-
+    
+    //load our itunes library regardless of whether we are a host or not
+    MPMediaQuery *everything = [[MPMediaQuery alloc] init];
+    
+    NSLog(@"Logging items from a generic query...");
+    NSArray *itemsFromGenericQuery = [everything items];
+    for (MPMediaItem *song in itemsFromGenericQuery) {
+        NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyTitle],@"title")];
+        NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyArtist],@"artist")];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0];
+        NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
+        [myLibrary setObject:newSong forKey:tempID];
+        NSLog (@"%@", tempTitle);
+    }
+    
     
 	    
 }

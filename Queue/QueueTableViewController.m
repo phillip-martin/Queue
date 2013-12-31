@@ -15,15 +15,43 @@
 
 @synthesize currentQueue;
 @synthesize addMusicButton;
+@synthesize songArray;
 
++(id)sharedInstance{
+    static QueueTableViewController *controller;
+    
+    @synchronized(self)
+    {
+        if (controller == NULL)
+            controller = [[self alloc] init];
+    }
 
+    
+    return controller;
+}
+
+-(void)showLibraryPicker:(NSArray *)library
+{
+    
+    LibraryViewController *libraryView = [[LibraryViewController alloc] initWithLibrary:library];
+    libraryView.delegate = self;
+    
+    UINavigationController *navigationController = [[UINavigationController alloc]
+                                                    initWithRootViewController:libraryView];
+    if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
+        [self presentViewController:navigationController animated:YES completion:nil];
+    } else {
+        [self presentModalViewController:navigationController animated:YES];
+    }
+
+}
 
 - (IBAction) addHandler {
     
     UINavigationController *navBar = self.tabBarController.viewControllers[2];
     BTLEViewController *btController = navBar.viewControllers[0];
     
-    if(btController.rangingSwitch.state == NO){
+    if(!btController.rangingSwitch.on){
         MPMediaPickerController *mediaPicker =
         [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
 	
@@ -40,11 +68,28 @@
     }
     
     else{
+        //if user is connected to playlist and wants to add a song, show him the library of the host
+        [self showLibraryPicker:[btController songsToArray]];
         
     }
 
 }
 
+-(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSMutableArray *)songs
+{
+    if(songs){
+        BTLEViewController *tempView = [BTLEViewController sharedInstance];
+        [tempView.centralManager writeHostPlaylist:songs];
+    }
+    
+    if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
+        [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
+    } else {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+
+//vote button for song
 -(void)upVote:(id)sender{
     UIButton *tempButton = (UIButton *)sender;
     SongStruct *temp = [self.songArray objectAtIndex:tempButton.tag];
@@ -69,8 +114,6 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
 
 // Responds to the user tapping Done after choosing music.
 - (void) mediaPicker: (MPMediaPickerController *) mediaPicker didPickMediaItems: (MPMediaItemCollection *) mediaItemCollection {
@@ -98,6 +141,8 @@
     }
     self.songArray = [self.addedSongs allValues];
 	[self.currentQueue reloadData];
+    BTLEViewController *tempView = [BTLEViewController sharedInstance];
+    [tempView.peripheralManager updatePlaylistCharacteristic];
     
 }
 
