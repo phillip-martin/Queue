@@ -9,6 +9,7 @@
 #import "LibraryViewController.h"
 #import "BTLEViewController.h"
 #import "QueueTableViewController.h"
+#import "BTLEViewController.h"
 #import "SongStruct.h"
 
 @interface LibraryViewController ()
@@ -24,28 +25,23 @@
 
 -(IBAction)done:(id)sender
 {
-    [self.delegate libraryViewController:self didChooseSongs:selectedSongs];
+    [self.libraryDelegate libraryViewController:self didChooseSongs:selectedSongs];
 }
 
 -(IBAction)addHandler:(id)sender
 {
     UIButton *senderButton = (UIButton *)sender;
-    [selectedSongs addObject:[libraryData objectAtIndex:[senderButton tag]]];
-}
-
-- (id)initWithLibrary:(NSArray *)library
-{
-    self = [super init];
-    if (self) {
-        libraryData = library;
-    }
-    return self;
+    SongStruct *tempSong = [libraryData objectAtIndex:[senderButton tag]];
+    [tempSong Vote];
+    [selectedSongs addObject:tempSong];
+    senderButton.enabled = NO;
+    
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+    NSLog(@"Showing library picker");
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
@@ -53,13 +49,7 @@
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     selectedSongs = [[NSMutableArray alloc] init];
     songButtons = [[NSMutableArray alloc] init];
-
-    doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
-    self.navigationController.navigationItem.rightBarButtonItem = doneButton;
-    
 }
-
-
 
 - (void)didReceiveMemoryWarning
 {
@@ -72,12 +62,13 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return [libraryData count] > 0 ? 0:1;
+    return [libraryData count] > 0 ? 1:0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
+    NSLog(@"%d",[libraryData count]);
     return [libraryData count];
 }
 
@@ -91,16 +82,13 @@
     titleLabel.font = [UIFont systemFontOfSize:17.0];
     titleLabel.textAlignment = NSTextAlignmentLeft;
     titleLabel.textColor = [UIColor blackColor];
-    titleLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
     [cell.contentView addSubview:titleLabel];
     
-    UILabel *artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 30.0, 230.0, 25.0)];
+    UILabel *artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 22.5, 230.0, 25.0)];
     artistLabel.font = [UIFont systemFontOfSize:12.0];
     artistLabel.textAlignment = NSTextAlignmentLeft;
     artistLabel.textColor = [UIColor darkGrayColor];
-    artistLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
     [cell.contentView addSubview:artistLabel];
-    
     
     UIButton *addButton = (UIButton *)cell.accessoryView;
     [addButton addTarget:self action:@selector(addHandler:) forControlEvents:UIControlEventTouchUpInside];
@@ -112,10 +100,10 @@
     [artistLabel setText:tempSong.artist];
     [titleLabel setText:tempSong.title];
     
-    
-    
     return cell;
 }
+
+
 
 /*
 // Override to support conditional editing of the table view.

@@ -7,24 +7,29 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "LeCentral.h"
-#import "LePeripheral.h"
-@import CoreBluetooth;
+#import <MultipeerConnectivity/MultipeerConnectivity.h>
 
-@interface BTLEViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate,LeCentral>
+
+@interface BTLEViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate>
+{
+    //MC sendes state messages out of order. Add this variable to help correct
+    int disconnectCount;
+}
 
 @property (nonatomic) UISwitch *advertisingSwitch;
 @property (nonatomic) UISwitch *rangingSwitch;
 @property (nonatomic) IBOutlet UILabel *statusLabel;
-@property (nonatomic) LePeripheral *peripheralManager;
-@property (nonatomic) LeCentral *centralManager;
-//@property (nonatomic) CBMutableCharacteristic *transferCharacteristicData;
-//@property (nonatomic) CBMutableCharacteristic *transferCharacteristicLibrary;
-@property (nonatomic) NSMutableArray *detectedPeripherals;
+@property (nonatomic) MCPeerID *myPeerID;
+@property (nonatomic) MCPeerID *connectedPeer;
+@property (nonatomic) NSMutableArray *foundPeers;
+@property (nonatomic) MCNearbyServiceAdvertiser *advertiser;
+@property (nonatomic) MCNearbyServiceBrowser *browser;
+@property (nonatomic) MCSession *currSession;
+@property (nonatomic) NSMutableArray *sessions;
 @property (nonatomic) NSString *hostName;
-@property (nonatomic) NSDictionary *myLibrary;
+@property (nonatomic) NSMutableArray *hostLibrary;
 
--(NSMutableArray *)songsToArray;
-+(id)sharedInstance;
+
+- (void)sendData:(NSData *)data toPeers:(NSArray *)peerIDs reliable:(BOOL)reliable error:(NSError *__autoreleasing *)error;
 
 @end

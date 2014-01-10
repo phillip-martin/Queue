@@ -24,7 +24,7 @@
     NSUInteger voteCount;
     MPMediaItem *nowPlayingItem;
     IBOutlet UILabel *nowPlayingLabel;
-    IBOutlet UIBarButtonItem *pausePlay;
+    IBOutlet UIButton *pausePlay;
     IBOutlet UISlider *songProgress;
     BOOL playing;
     BOOL interruptedOnPlayback;
@@ -40,16 +40,16 @@
 @property (nonatomic,copy) MPMediaItem *nowPlayingItem;
 @property (nonatomic) IBOutlet UILabel *nowPlayingLabel;
 @property (nonatomic) IBOutlet UILabel *artistLabel;
-@property (nonatomic) IBOutlet UIBarButtonItem *pausePlay;
+@property (nonatomic) IBOutlet UIButton *pausePlay;
 @property (nonatomic) IBOutlet UISlider *songProgress;
-@property (nonatomic) NSMutableDictionary *myLibrary;
+@property (nonatomic) NSMutableArray *myLibrary;
 @property (readwrite) BOOL playing;
 @property (readwrite) BOOL interruptedOnPlayback;
 
 
 -(IBAction)pauseOrPlayMusic :(id)sender;
 - (void) updatePlayerQueueWithMediaCollection: (MPMediaItemCollection *) mediaItemCollection;
-+(id)sharedInstance;
+
 
 @end
 

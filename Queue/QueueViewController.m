@@ -141,22 +141,9 @@ void audioRouteChangeListenerCallback (
         //		finished playing.
         [nowPlayingLabel setText: [
                                    NSString stringWithFormat: @"%@",
-                                   NSLocalizedString (@"Music-ended Instructions", @"Label for prompting user to play music again after it has stopped")]];
+                                   NSLocalizedString (@"", @"Label for prompting user to play music again after it has stopped")]];
         
     }
-}
-
-+(id)sharedInstance{
-    static QueueViewController *controller;
-    
-    @synchronized(self)
-    {
-        if (controller == NULL)
-            controller = [[self alloc] init];
-    }
-    
-    
-    return controller;
 }
 
 - (void)viewDidLoad
@@ -164,12 +151,13 @@ void audioRouteChangeListenerCallback (
     [super viewDidLoad];
     
     mainPlayer = [MPMusicPlayerController iPodMusicPlayer];
+    myLibrary = [[NSMutableArray alloc] init];
     
     
     [songProgress setValue:[mainPlayer currentPlaybackTime] animated:YES];
     [artworkItem setImage:[UIImage imageNamed:@"no_artwork.png"]];
-	[nowPlayingLabel setText: NSLocalizedString (@"Song_title", @"Brief instructions to user, shown at launch")];
-    [artistLabel setText:NSLocalizedString(@"Artist_here", @"Artist")];
+	[nowPlayingLabel setText: NSLocalizedString (@"", @"Brief instructions to user, shown at launch")];
+    [artistLabel setText:NSLocalizedString(@"", @"Artist")];
     [self registerForMediaPlayerNotifications];
     
     self.tabBarItem.image = [UIImage imageNamed:@"no_artwork.png"];
@@ -187,17 +175,16 @@ void audioRouteChangeListenerCallback (
     
     NSLog(@"Logging items from a generic query...");
     NSArray *itemsFromGenericQuery = [everything items];
+    
     for (MPMediaItem *song in itemsFromGenericQuery) {
         NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyTitle],@"title")];
         NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyArtist],@"artist")];
         SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0];
-        NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
-        [myLibrary setObject:newSong forKey:tempID];
-        NSLog (@"%@", tempTitle);
+        [myLibrary addObject:newSong];
+         NSLog (@"%@", tempTitle);
     }
-    
-    
-	    
+    NSLog(@"%lul songs loaded from library",(unsigned long)[myLibrary count]);
+
 }
 
 // If the music player was paused, leave it paused. If it was playing, it will continue to
@@ -294,10 +281,10 @@ void audioRouteChangeListenerCallback (
     
 	if (playbackState == MPMusicPlaybackStateStopped || playbackState == MPMusicPlaybackStatePaused) {
 		[mainPlayer play];
-        //[pausePlay setImage:[UIImage imageNamed:@"play_button.png"] forState:UIControlStateSelected];
+        [pausePlay setImage:[UIImage imageNamed:@"play_button.png"] forState:UIControlStateSelected];
 	} else if (playbackState == MPMusicPlaybackStatePlaying) {
 		[mainPlayer pause];
-        //[pausePlay setImage:[UIImage imageNamed:@"pause_button.png"] forState:UIControlStateSelected];
+        [pausePlay setImage:[UIImage imageNamed:@"pause_button.png"] forState:UIControlStateSelected];
 	}
 }
 
@@ -317,8 +304,8 @@ void audioRouteChangeListenerCallback (
 	// The AmbientSound category allows application audio to mix with Media Player
 	// audio. The category also indicates that application audio should stop playing
 	// if the Ring/Siilent switch is set to "silent" or the screen locks.
-	[[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryAmbient error: nil];
-    /*
+	//[[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryAmbient error: nil];
+    
      // Use this code instead to allow the app sound to continue to play when the screen is locked.
      [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayback error: nil];
      
@@ -328,7 +315,7 @@ void audioRouteChangeListenerCallback (
      sizeof (doSetProperty),
      &doSetProperty
      );
-     */
+    
     
 	// Registers the audio route change listener callback function
 	AudioSessionAddPropertyListener (
@@ -387,7 +374,6 @@ void audioRouteChangeListenerCallback (
             [self setSongQueue:[MPMediaItemCollection collectionWithItems: combinedMediaItems]];
 			[mainPlayer setQueueWithItemCollection: songQueue];
             
-            
 			// Apply the new media item collection as a playback queue for the music player.
 			[mainPlayer setQueueWithItemCollection: songQueue];
 			
@@ -401,12 +387,8 @@ void audioRouteChangeListenerCallback (
              
              }
             
-            
-            /*[addSong setTitle: NSLocalizedString (@"Show Music", @"Alternate title for 'Add Music' button, after user has chosen some music")
-             forState: UIControlStateNormal];*/ //not sure if we want the add button in this view controller?
         }
     }
-    
     
 }
      

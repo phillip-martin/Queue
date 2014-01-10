@@ -12,13 +12,12 @@
 
 @interface LibraryViewController : UITableViewController<UITableViewDataSource, UITableViewDelegate>
 
-@property (nonatomic, assign) id<LibraryViewControllerDelegate> delegate;
+@property (nonatomic, assign) id<LibraryViewControllerDelegate> libraryDelegate;
 @property (nonatomic) NSArray *libraryData;
 @property (nonatomic) NSMutableArray *selectedSongs;
 @property (nonatomic) NSMutableArray *songButtons;
-@property (nonatomic) UIBarButtonItem *doneButton;
+@property (nonatomic) IBOutlet UIBarButtonItem *doneButton;
 
--(id)initWithLibrary:(NSArray *)library;
 -(IBAction)done:(id)sender;
 -(IBAction)addHandler:(id)sender;
 

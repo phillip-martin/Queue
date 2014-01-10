@@ -16,6 +16,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qKY-Ep-HsB" customClass="FXBlurView">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="519"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                            </view>
                             <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="BTd-gZ-c23">
                                 <rect key="frame" x="43" y="420" width="235" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -55,23 +60,15 @@
                                 </attributedString>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" fixedFrame="YES" barStyle="black" translatesAutoresizingMaskIntoConstraints="NO" id="0HP-rE-ZvA">
-                                <rect key="frame" x="0.0" y="474" width="320" height="44"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <items>
-                                    <barButtonItem systemItem="refresh" id="rFi-mg-p4c"/>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="sj1-Id-Asu"/>
-                                    <barButtonItem systemItem="rewind" id="nwv-be-Efo"/>
-                                    <barButtonItem width="34" style="plain" systemItem="fixedSpace" id="ZeN-Vc-7y2"/>
-                                    <barButtonItem systemItem="play" id="V5v-nb-Wx9">
-                                        <connections>
-                                            <action selector="pauseOrPlayMusic:" destination="vXZ-lx-hvc" id="P78-Ym-Rp8"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem width="35" style="plain" systemItem="fixedSpace" id="XwI-Bv-DhS"/>
-                                    <barButtonItem systemItem="fastForward" id="hxO-5w-hMM"/>
-                                </items>
-                            </toolbar>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rPz-D5-bTj">
+                                <rect key="frame" x="138" y="461" width="45" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <state key="normal" image="play_button.png"/>
+                                <connections>
+                                    <action selector="pauseOrPlayMusic:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="pBv-Nq-iuI"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
@@ -84,6 +81,7 @@
                         <outlet property="artistLabel" destination="8Rk-9d-iPa" id="PI9-wb-PiJ"/>
                         <outlet property="artworkItem" destination="CJh-hc-21M" id="Jox-vK-IA4"/>
                         <outlet property="nowPlayingLabel" destination="82a-V1-hXD" id="9a1-aJ-q10"/>
+                        <outlet property="pausePlay" destination="rPz-D5-bTj" id="Q32-8A-MKf"/>
                         <outlet property="songProgress" destination="BTd-gZ-c23" id="hiD-rR-UVQ"/>
                     </connections>
                 </viewController>
@@ -94,17 +92,17 @@
         <!--Library View Controller-->
         <scene sceneID="sge-KK-mNH">
             <objects>
-                <tableViewController id="1cp-fC-gUl" customClass="LibraryViewController" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="LibraryView" id="1cp-fC-gUl" customClass="LibraryViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="id4-3O-ieq">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Song" id="N5e-Xr-2F3">
-                                <rect key="frame" x="0.0" y="22" width="320" height="44"/>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="gray" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Song" rowHeight="55" id="N5e-Xr-2F3">
+                                <rect key="frame" x="0.0" y="86" width="320" height="55"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="N5e-Xr-2F3" id="A7m-2b-m0m">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="54"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="contactAdd" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zyS-1J-QW5">
@@ -127,10 +125,20 @@
                             <outlet property="delegate" destination="1cp-fC-gUl" id="SoO-I6-2Rh"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="D2z-7Y-GKJ">
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="pNE-Sn-Ttb">
+                            <connections>
+                                <action selector="done:" destination="1cp-fC-gUl" id="4hu-CG-GV0"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="doneButton" destination="pNE-Sn-Ttb" id="jwV-Ye-9Zp"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DEx-5W-TGu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3412" y="-575"/>
+            <point key="canvasLocation" x="3938" y="-575"/>
         </scene>
         <!--Queue Table View Controller-->
         <scene sceneID="dS5-B7-Snk">
@@ -141,7 +149,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="gray" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" rowHeight="55" id="fvR-Da-s97">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" rowHeight="55" id="fvR-Da-s97">
                                 <rect key="frame" x="0.0" y="119" width="320" height="55"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="right" tableViewCell="fvR-Da-s97" id="SKj-cP-29V">
@@ -170,6 +178,7 @@
                     <connections>
                         <outlet property="addMusicButton" destination="Ovj-u4-M9N" id="eVl-sp-K3z"/>
                         <outlet property="currentQueue" destination="gJ4-pU-xcd" id="cM7-fg-FD5"/>
+                        <segue destination="ocB-ip-b8Y" kind="modal" identifier="LibraryViewSegue" id="876-d4-FzM"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cON-Gl-T5m" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -184,7 +193,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="519"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
-                        <label key="tableHeaderView" opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="08y-1D-DBJ">
+                        <label key="tableHeaderView" opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="08y-1D-DBJ">
                             <rect key="frame" x="0.0" y="64" width="320" height="44"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -310,10 +319,29 @@
             </objects>
             <point key="canvasLocation" x="1066" y="982"/>
         </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="SZX-rk-M4W">
+            <objects>
+                <navigationController storyboardIdentifier="LibraryNavController" automaticallyAdjustsScrollViewInsets="NO" id="ocB-ip-b8Y" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="fFW-jS-4qN">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="1cp-fC-gUl" kind="relationship" relationship="rootViewController" id="dIt-9m-1ID"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ulC-5Q-3Zg" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3412" y="-575"/>
+        </scene>
     </scenes>
     <resources>
         <image name="Mobile_Signal.png" width="26" height="23"/>
         <image name="no_artwork.png" width="32" height="32"/>
+        <image name="play_button.png" width="59" height="60"/>
     </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedStatusBarMetrics key="statusBar"/>

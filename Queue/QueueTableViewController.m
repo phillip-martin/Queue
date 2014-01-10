@@ -17,35 +17,6 @@
 @synthesize addMusicButton;
 @synthesize songArray;
 
-+(id)sharedInstance{
-    static QueueTableViewController *controller;
-    
-    @synchronized(self)
-    {
-        if (controller == NULL)
-            controller = [[self alloc] init];
-    }
-
-    
-    return controller;
-}
-
--(void)showLibraryPicker:(NSArray *)library
-{
-    
-    LibraryViewController *libraryView = [[LibraryViewController alloc] initWithLibrary:library];
-    libraryView.delegate = self;
-    
-    UINavigationController *navigationController = [[UINavigationController alloc]
-                                                    initWithRootViewController:libraryView];
-    if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
-        [self presentViewController:navigationController animated:YES completion:nil];
-    } else {
-        [self presentModalViewController:navigationController animated:YES];
-    }
-
-}
-
 - (IBAction) addHandler {
     
     UINavigationController *navBar = self.tabBarController.viewControllers[2];
@@ -68,20 +39,23 @@
     }
     
     else{
-        //if user is connected to playlist and wants to add a song, show him the library of the host
-        [self showLibraryPicker:[btController songsToArray]];
+        [self performSegueWithIdentifier:@"LibraryViewSegue" sender:self];
         
     }
-
 }
 
 -(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSMutableArray *)songs
 {
-    if(songs){
-        BTLEViewController *tempView = [BTLEViewController sharedInstance];
-        [tempView.centralManager writeHostPlaylist:songs];
+    if([songs count] > 0){
+        UINavigationController *navController = self.tabBarController.viewControllers[2];
+        BTLEViewController *tempView = navController.viewControllers[0];
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:songs];
+        [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:tempView.connectedPeer, nil] reliable:YES error:nil];
+        for(SongStruct *tempSong in songs){
+            [self.addedSongs setObject:tempSong forKey:tempSong.strIdentifier];
+        }
+        [self addedSong];
     }
-    
     if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
         [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
     } else {
@@ -94,20 +68,44 @@
     UIButton *tempButton = (UIButton *)sender;
     SongStruct *temp = [self.songArray objectAtIndex:tempButton.tag];
     [temp Vote];
-    [tempButton setEnabled:NO]; //not working
+    tempButton.enabled = NO; //not working
     [self.currentQueue reloadData];
+    NSArray *tempArray = [[NSArray alloc] initWithObjects:temp, nil];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:tempArray];
+    UINavigationController *navController = self.tabBarController.viewControllers[2];
+    BTLEViewController *tempView = navController.viewControllers[0];
+    if(tempView.rangingSwitch.on && tempView.connectedPeer != nil){
+        [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:tempView.connectedPeer, nil] reliable:YES error:nil];
+    }
+    else if (tempView.advertisingSwitch.on){
+        [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all",nil] reliable:YES error:nil];
+    }
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
-    self.currentQueue.dataSource = self;
-    self.currentQueue.delegate = self;
     self.addedSongs = [[NSMutableDictionary alloc] init];
+    /*NSFileManager* manager = [NSFileManager defaultManager];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentPath = [paths objectAtIndex:0];
+    NSString *path;
+    NSError *error;
+    if ((path = [documentPath stringByAppendingPathComponent:@"CurrentPlaylist.plist"]))
+    {
+        //if file exists, delete it and create new one
+        if ([manager fileExistsAtPath:path] == YES) {
+            [manager removeItemAtPath:path error:&error];
+        }
+        
+        resourcePath = [[NSBundle mainBundle] pathForResource:@"CurrentPlaylist" ofType:@"plist"];
+        [manager copyItemAtPath:resourcePath toPath:path error:&error];
+        NSLog(@"loaded current playlist plist");
+        
+    }*/
+
 }
-
-
 
 - (void)didReceiveMemoryWarning
 {
@@ -138,11 +136,13 @@
             SongStruct *temp = [self.addedSongs objectForKey:tempID];
             [temp Vote];
         }
+        
     }
-    self.songArray = [self.addedSongs allValues];
-	[self.currentQueue reloadData];
-    BTLEViewController *tempView = [BTLEViewController sharedInstance];
-    [tempView.peripheralManager updatePlaylistCharacteristic];
+    [self addedSong];
+    UINavigationController *navController = self.tabBarController.viewControllers[2];
+    BTLEViewController *tempView = navController.viewControllers[0];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.songArray];
+    [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
     
 }
 
@@ -152,13 +152,17 @@
     } else {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
-
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
     return [self.addedSongs count];
+}
+
+-(void)addedSong{
+    self.songArray = [self.addedSongs allValues];
+	[self.currentQueue reloadData];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -183,27 +187,27 @@
         }
     }
 	titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 7.5, 230.0, 20)];
-    titleLabel.font = [UIFont systemFontOfSize:17.0];
+    titleLabel.font = [UIFont systemFontOfSize:22.5];
     titleLabel.textAlignment = NSTextAlignmentLeft;
     titleLabel.textColor = [UIColor blackColor];
     titleLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
     [cell.contentView addSubview:titleLabel];
     
-    artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 30.0, 230.0, 25.0)];
-    artistLabel.font = [UIFont systemFontOfSize:12.0];
+    artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 25.0, 230.0, 25.0)];
+    artistLabel.font = [UIFont systemFontOfSize:14.0];
     artistLabel.textAlignment = NSTextAlignmentLeft;
     artistLabel.textColor = [UIColor darkGrayColor];
     artistLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
     [cell.contentView addSubview:artistLabel];
     
-    votesLabel = [[UILabel alloc] initWithFrame:CGRectMake(255.0, 30.0, 55.0, 25.0)];
-    votesLabel.font = [UIFont systemFontOfSize:12.0];
+    votesLabel = [[UILabel alloc] initWithFrame:CGRectMake(255.0, 25.0, 55.0, 25.0)];
+    votesLabel.font = [UIFont systemFontOfSize:14.0];
     votesLabel.textAlignment = NSTextAlignmentLeft;
     votesLabel.textColor = [UIColor darkGrayColor];
     [cell.contentView addSubview:votesLabel];
     
     
-    sideButton = [[UIButton alloc] initWithFrame:CGRectMake(255.0, 20.0, 55.0, 15.0)];
+    sideButton = [[UIButton alloc] initWithFrame:CGRectMake(255.0, 15.0, 55.0, 15.0)];
     [sideButton addTarget:self action:@selector(upVote:) forControlEvents:UIControlEventTouchUpInside];
     [sideButton setTag:[indexPath row]];
     [sideButton setTitle:@"Vote" forState:UIControlStateNormal];
@@ -275,6 +279,15 @@
 {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    if([[segue identifier] isEqual:@"LibraryViewSegue"]){
+        UINavigationController *nav = segue.destinationViewController;
+        LibraryViewController *LVC = nav.viewControllers[0];
+        [LVC setLibraryDelegate:self];
+        UINavigationController *navController = self.tabBarController.viewControllers[2];
+        BTLEViewController *tempView = navController.viewControllers[0];
+        [LVC setLibraryData:[tempView hostLibrary]];
+    }
+    
 }
 
 

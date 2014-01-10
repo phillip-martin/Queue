@@ -14,6 +14,7 @@
     IBOutlet UITableView *currentQueue;
     //IBOutlet UIBarButtonItem *songInfo; Do we want this? for voting?
     IBOutlet UIBarButtonItem *addMusicButton;
+    NSString *resourcePath;
     
 }
 
@@ -22,9 +23,8 @@
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 @property (nonatomic) NSArray *songArray;
 
-+(id)sharedInstance;
 -(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSMutableArray *)songs;
-
+-(void)addedSong;
 @end
 
 

@@ -8,9 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		AA45FE951871FC700094F0EC /* LibraryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FE941871FC700094F0EC /* LibraryViewController.m */; };
-		AA45FE9818720BAB0094F0EC /* LeCentral.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FE9718720BAB0094F0EC /* LeCentral.m */; };
-		AA45FE9B18721B620094F0EC /* LePeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FE9A18721B620094F0EC /* LePeripheral.m */; };
-		AA595C9E186D287300426227 /* BTLEViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA595C9D186D287300426227 /* BTLEViewController.m */; };
+		AA45FEE3187796190094F0EC /* MultipeerConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA45FEE2187796190094F0EC /* MultipeerConnectivity.framework */; };
+		AA45FEE818779C2E0094F0EC /* BTLEViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA45FEE718779C2E0094F0EC /* BTLEViewController.m */; };
 		AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */ = {isa = PBXBuildFile; fileRef = AA595CA3186D3E0B00426227 /* SongStruct.m */; };
 		AA595CAB186DAE4700426227 /* Mobile_Signal.png in Resources */ = {isa = PBXBuildFile; fileRef = AA595CAA186DAE4700426227 /* Mobile_Signal.png */; };
 		AA87037818626EB00062A25C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA87037718626EB00062A25C /* Foundation.framework */; };
@@ -36,6 +35,10 @@
 		AA8703C2186282460062A25C /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA8703C1186282460062A25C /* AVFoundation.framework */; };
 		AA8703C51862A6BE0062A25C /* QueueTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA8703C41862A6BE0062A25C /* QueueTableViewController.m */; };
 		AA8703CD1862D1200062A25C /* background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = AA8703CC1862D1200062A25C /* background.jpg */; };
+		AAA82245187881B400F55CE3 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82244187881B400F55CE3 /* FXBlurView.m */; };
+		AAA822471878893F00F55CE3 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAA822461878893F00F55CE3 /* Accelerate.framework */; };
+		AAA8224D187F5EC200F55CE3 /* CurrentPlaylist.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAA8224C187F5EC200F55CE3 /* CurrentPlaylist.plist */; };
+		AAA82256187FC62500F55CE3 /* MySidePanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82255187FC62500F55CE3 /* MySidePanelViewController.m */; };
 		AABFC8051863165500AF22B4 /* no_artwork.png in Resources */ = {isa = PBXBuildFile; fileRef = AABFC8041863165500AF22B4 /* no_artwork.png */; };
 /* End PBXBuildFile section */
 
@@ -52,12 +55,9 @@
 /* Begin PBXFileReference section */
 		AA45FE931871FC700094F0EC /* LibraryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibraryViewController.h; sourceTree = "<group>"; };
 		AA45FE941871FC700094F0EC /* LibraryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibraryViewController.m; sourceTree = "<group>"; };
-		AA45FE9618720BAB0094F0EC /* LeCentral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeCentral.h; sourceTree = "<group>"; };
-		AA45FE9718720BAB0094F0EC /* LeCentral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeCentral.m; sourceTree = "<group>"; };
-		AA45FE9918721B620094F0EC /* LePeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LePeripheral.h; sourceTree = "<group>"; };
-		AA45FE9A18721B620094F0EC /* LePeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LePeripheral.m; sourceTree = "<group>"; };
-		AA595C9C186D287300426227 /* BTLEViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTLEViewController.h; sourceTree = "<group>"; };
-		AA595C9D186D287300426227 /* BTLEViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTLEViewController.m; sourceTree = "<group>"; };
+		AA45FEE2187796190094F0EC /* MultipeerConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MultipeerConnectivity.framework; path = System/Library/Frameworks/MultipeerConnectivity.framework; sourceTree = SDKROOT; };
+		AA45FEE718779C2E0094F0EC /* BTLEViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTLEViewController.m; sourceTree = "<group>"; };
+		AA45FEE918779C6B0094F0EC /* BTLEViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTLEViewController.h; sourceTree = "<group>"; };
 		AA595CA2186D3E0B00426227 /* SongStruct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SongStruct.h; sourceTree = "<group>"; };
 		AA595CA3186D3E0B00426227 /* SongStruct.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SongStruct.m; sourceTree = "<group>"; };
 		AA595CAA186DAE4700426227 /* Mobile_Signal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Mobile_Signal.png; sourceTree = "<group>"; };
@@ -90,6 +90,12 @@
 		AA8703C31862A6BE0062A25C /* QueueTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QueueTableViewController.h; sourceTree = "<group>"; };
 		AA8703C41862A6BE0062A25C /* QueueTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QueueTableViewController.m; sourceTree = "<group>"; };
 		AA8703CC1862D1200062A25C /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = background.jpg; sourceTree = "<group>"; };
+		AAA82243187881B400F55CE3 /* FXBlurView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FXBlurView.h; sourceTree = "<group>"; };
+		AAA82244187881B400F55CE3 /* FXBlurView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXBlurView.m; sourceTree = "<group>"; };
+		AAA822461878893F00F55CE3 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		AAA8224C187F5EC200F55CE3 /* CurrentPlaylist.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CurrentPlaylist.plist; sourceTree = "<group>"; };
+		AAA82254187FC62500F55CE3 /* MySidePanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MySidePanelViewController.h; sourceTree = "<group>"; };
+		AAA82255187FC62500F55CE3 /* MySidePanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MySidePanelViewController.m; sourceTree = "<group>"; };
 		AABFC8041863165500AF22B4 /* no_artwork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = no_artwork.png; sourceTree = "<group>"; };
 		AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -99,6 +105,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAA822471878893F00F55CE3 /* Accelerate.framework in Frameworks */,
+				AA45FEE3187796190094F0EC /* MultipeerConnectivity.framework in Frameworks */,
 				AA8703C2186282460062A25C /* AVFoundation.framework in Frameworks */,
 				AA8703C0186282400062A25C /* AudioToolbox.framework in Frameworks */,
 				AA8703BB18627A550062A25C /* MediaPlayer.framework in Frameworks */,
@@ -143,6 +151,8 @@
 		AA87037618626EB00062A25C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AAA822461878893F00F55CE3 /* Accelerate.framework */,
+				AA45FEE2187796190094F0EC /* MultipeerConnectivity.framework */,
 				AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */,
 				AA8703C1186282460062A25C /* AVFoundation.framework */,
 				AA8703BF186282400062A25C /* AudioToolbox.framework */,
@@ -158,15 +168,15 @@
 		AA87037D18626EB00062A25C /* Queue */ = {
 			isa = PBXGroup;
 			children = (
-				AA45FE9618720BAB0094F0EC /* LeCentral.h */,
-				AA45FE9718720BAB0094F0EC /* LeCentral.m */,
-				AA45FE9918721B620094F0EC /* LePeripheral.h */,
-				AA45FE9A18721B620094F0EC /* LePeripheral.m */,
-				AA595C9C186D287300426227 /* BTLEViewController.h */,
-				AA595C9D186D287300426227 /* BTLEViewController.m */,
+				AAA82254187FC62500F55CE3 /* MySidePanelViewController.h */,
+				AAA82255187FC62500F55CE3 /* MySidePanelViewController.m */,
+				AA45FEE918779C6B0094F0EC /* BTLEViewController.h */,
+				AA45FEE718779C2E0094F0EC /* BTLEViewController.m */,
 				AA87038618626EB00062A25C /* QueueAppDelegate.h */,
 				AA87038718626EB00062A25C /* QueueAppDelegate.m */,
 				AA87038918626EB00062A25C /* Main.storyboard */,
+				AAA82243187881B400F55CE3 /* FXBlurView.h */,
+				AAA82244187881B400F55CE3 /* FXBlurView.m */,
 				AA87038C18626EB00062A25C /* QueueViewController.h */,
 				AA87038D18626EB00062A25C /* QueueViewController.m */,
 				AA8703C31862A6BE0062A25C /* QueueTableViewController.h */,
@@ -184,6 +194,7 @@
 		AA87037E18626EB00062A25C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				AAA8224C187F5EC200F55CE3 /* CurrentPlaylist.plist */,
 				AA595CAA186DAE4700426227 /* Mobile_Signal.png */,
 				AABFC8041863165500AF22B4 /* no_artwork.png */,
 				AA8703CC1862D1200062A25C /* background.jpg */,
@@ -304,6 +315,7 @@
 				AA8703CD1862D1200062A25C /* background.jpg in Resources */,
 				AA87038218626EB00062A25C /* InfoPlist.strings in Resources */,
 				AA87038B18626EB00062A25C /* Main.storyboard in Resources */,
+				AAA8224D187F5EC200F55CE3 /* CurrentPlaylist.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,13 +334,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA45FE9818720BAB0094F0EC /* LeCentral.m in Sources */,
 				AA87038E18626EB00062A25C /* QueueViewController.m in Sources */,
-				AA45FE9B18721B620094F0EC /* LePeripheral.m in Sources */,
 				AA45FE951871FC700094F0EC /* LibraryViewController.m in Sources */,
-				AA595C9E186D287300426227 /* BTLEViewController.m in Sources */,
+				AAA82256187FC62500F55CE3 /* MySidePanelViewController.m in Sources */,
 				AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */,
 				AA8703C51862A6BE0062A25C /* QueueTableViewController.m in Sources */,
+				AA45FEE818779C2E0094F0EC /* BTLEViewController.m in Sources */,
+				AAA82245187881B400F55CE3 /* FXBlurView.m in Sources */,
 				AA87038818626EB00062A25C /* QueueAppDelegate.m in Sources */,
 				AA87038418626EB00062A25C /* main.m in Sources */,
 			);
