@@ -31,10 +31,13 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     NTRangingRow
 };
 
-
+#import "JASidePanelController.h"
+#import "UIViewController+JASidePanel.h"
 #import "BTLEViewController.h"
-#import "QueueTableViewController.h"
 #import "QueueViewController.h"
+#import "QueueTableViewController.h"
+#import "LeftPanelViewController.h"
+
 #import "SongStruct.h"
 
 @interface BTLEViewController ()
@@ -60,15 +63,14 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
         {
             NSLog(@"%@ is connected",peerID.displayName);
             if(self.advertisingSwitch.on){
-                NSMutableArray *tempLibrary = [[NSMutableArray alloc] init];
-                SongStruct *messageSong = [[SongStruct alloc] initWithTitle:@"itunes" artist:nil voteCount:0];
-                [tempLibrary addObject:messageSong];
+                /*NSMutableArray *tempLibrary = [[NSMutableArray alloc] init];
+                [tempLibrary addObject:@"itunes"];
                 [tempLibrary addObjectsFromArray:hostLibrary];//hostLibrary is my library when I am a server
                 NSData *data = [NSKeyedArchiver archivedDataWithRootObject:tempLibrary];
-                [self sendData:data toPeers:[[NSArray alloc] initWithObjects:peerID, nil] reliable:YES error:nil];
-                UINavigationController *navController = self.tabBarController.viewControllers[1];
-                QueueTableViewController *qtvc = navController.viewControllers[0];
-                data = [NSKeyedArchiver archivedDataWithRootObject:[qtvc songArray]];
+                [self sendData:data toPeers:[[NSArray alloc] initWithObjects:peerID, nil] reliable:YES error:nil];*/ //probably wont need this feature
+                LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+                QueueTableViewController *queueTable = [leftController QTVC];
+                NSData *data = [NSKeyedArchiver archivedDataWithRootObject:[queueTable songArray]];
                 [self sendData:data toPeers:[[NSArray alloc] initWithObjects:peerID, nil] reliable:YES error:nil];
                 disconnectCount = 0;
             }
@@ -98,6 +100,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
 -(void)session:(MCSession *)session didStartReceivingResourceWithName:(NSString *)resourceName fromPeer:(MCPeerID *)peerID withProgress:(NSProgress *)progress
 {
     NSLog(@"receiving resource %@",resourceName);
+    
 }
 
 -(void)session:(MCSession *)session didFinishReceivingResourceWithName:(NSString *)resourceName fromPeer:(MCPeerID *)peerID atURL:(NSURL *)localURL withError:(NSError *)error
@@ -157,14 +160,18 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     connectedPeer = nil;
     [browser startBrowsingForPeers];
     disconnectCount = 0;
+    LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+    QueueTableViewController *queueTable = [leftController QTVC];
+    [queueTable.addedSongs removeAllObjects];
+    [queueTable addedSong];
     [self.tableView reloadData];
 }
 
  //May not want to include wifi
 -(void)centralStatePoweredOff
 {
-    NSString *title     = @"Bluetooth/WiFi Power";
-    NSString *message   = @"You must turn on Bluetooth and/or WiFi in Settings in order to find or host a playlist";
+    NSString *title     = @"Bluetooth Power";
+    NSString *message   = @"You must turn on Bluetooth in Settings in order to find or host a playlist";
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alertView show];
 }
@@ -196,8 +203,8 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                                                      serviceType:QueueService];
     advertiser.delegate = self;
     currSession = [self availableSession];
-    UINavigationController *navController = self.tabBarController.viewControllers[0];
-    QueueViewController *qvc = navController.viewControllers[0];
+    LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+    QueueViewController *qvc = [leftController QVC];
     hostLibrary = [qvc myLibrary];
     [advertiser startAdvertisingPeer];
 }
@@ -246,8 +253,8 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
         browser = [[MCNearbyServiceBrowser alloc] initWithPeer:myPeerID serviceType:QueueService];
         browser.delegate = self;
         hostLibrary = [[NSMutableArray alloc] init];
-        UINavigationController *navController = self.tabBarController.viewControllers[1];
-        QueueTableViewController *queueTable = navController.viewControllers[0];
+        LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+        QueueTableViewController *queueTable = [leftController QTVC];
         //if we have data in our table, remove it
         [queueTable.addedSongs removeAllObjects];
         [queueTable addedSong];
@@ -337,73 +344,176 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
  didReceiveData:(NSData *)data
        fromPeer:(MCPeerID *)peerID
 {
+    LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+    QueueViewController *mainView = [leftController QVC];
+    QueueTableViewController *queueTable = [leftController QTVC];
+    
     NSLog(@"received data from %@",peerID.displayName);
     NSMutableArray *newPlaylist = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-    SongStruct *messageSong = [newPlaylist objectAtIndex:0];
-    //if we are a client, the first song is a message from the host
-    //If the client requested the host itues library, the first song in the array will have the title "itunes"
-    if([messageSong.title  isEqual: @"itunes"]){
-        NSLog(@"itunes data size %u",[newPlaylist count]-1);
-        for (SongStruct *item in newPlaylist) {
-            if(![item.title isEqual:@"itunes"]){//dont want to add the message object
-                [hostLibrary addObject:item];
-                NSLog(@"%@",item.title);
+    if([newPlaylist isKindOfClass:[NSMutableArray class]]){
+        //if we are a client, the first song is a message from the host
+        NSString *message = [newPlaylist objectAtIndex:0];
+        //remove message
+        [newPlaylist removeObjectAtIndex:0];
+        //If the client requested the host itues library, the first song in the array will have the title "itunes"
+        if([message isEqual: @"itunes"]){
+            NSLog(@"itunes data size %u",[newPlaylist count]-1);
+            for (id item in newPlaylist) {
+                if([item isKindOfClass:[SongStruct class]]){//dont want to add the message object
+                    [hostLibrary addObject:(SongStruct *)item];
+                }
             }
         }
+        else if ([message isEqual:@"song buffer"]){ //should only receive this if host
+            //received a song buffer.
+            NSLog(@"buffer");
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString *documentsDirectory = [paths objectAtIndex:0];
+            //first loops adds songs with url to our library
+            for (id item in newPlaylist) {
+                if([item isKindOfClass:[SongStruct class]]){//dont want to add the message object
+                    NSString *tempID = [NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]];
+                    if([queueTable.addedSongs objectForKey:tempID] == nil){
+                        NSString *appFile = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]]];
+                        [[item buffer] writeToFile:appFile atomically: YES];
+                        NSURL *filepath = [NSURL fileURLWithPath:appFile];
+                        [item setBuffer:nil];
+                        [item setMediaURL:filepath];
+                        
+                    }
+                }
+            }
+            [mainView updatePlayerQueueWithMediaCollection: newPlaylist];
+            
+            //second loops adds them to our queue table
+            NSMutableArray *noDataSongs = [[NSMutableArray alloc] init];
+            for (id item in newPlaylist) {
+                if([item isKindOfClass:[SongStruct class]]){//dont want to add the message object
+                    NSString *tempID = [NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]];
+                    if([queueTable.addedSongs objectForKey:tempID] == nil){
+                        [item setArtwork:nil];
+                        [item setBuffer:nil];
+                        [item setMediaURL:nil];
+                        
+                    }
+                    else{
+                        [item Vote];
+                    }
+                    [noDataSongs addObject:item];
+                }
+            }
+            NSData *newData = [NSKeyedArchiver archivedDataWithRootObject:noDataSongs];
+            for(MCSession *tempSession in sessions){
+                //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
+                NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
+                for(MCPeerID *peer in tempSession.connectedPeers){
+                    if(peer != peerID){
+                        [idsToSend addObject:peer];
+                    }
+                }
+                [self sendData:newData toPeers:idsToSend reliable:YES error:nil];
+            }
+
+        }
+        //if it doesnt have the itunes message, then it was playlist data
+        else{
+            //handling of adding songs should be the same on QTVC for both server and client
+            for (SongStruct *item in newPlaylist) {
+                //if we dont have have the song, query for it in our library, then add it
+                NSString *tempID = [NSString stringWithFormat:@"%@",item.strIdentifier];
+                if([queueTable.addedSongs objectForKey:tempID] == nil){
+                    
+                    if(self.advertisingSwitch.on){//if we're hosting the playlist
+                        MPMediaPropertyPredicate *artistNamePredicate =
+                        [MPMediaPropertyPredicate predicateWithValue: item.artist
+                                                         forProperty: MPMediaItemPropertyArtist
+                                                      comparisonType:MPMediaPredicateComparisonEqualTo];
+                        NSLog(@"%@",item.artist);
+                        MPMediaPropertyPredicate *albumNamePredicate =
+                        [MPMediaPropertyPredicate predicateWithValue: item.title
+                                                         forProperty: MPMediaItemPropertyTitle
+                                                      comparisonType:MPMediaPredicateComparisonEqualTo];
+                        NSLog(@"%@",item.title);
+                        MPMediaQuery *myComplexQuery = [[MPMediaQuery alloc] init];
+                        
+                        [myComplexQuery addFilterPredicate: artistNamePredicate];
+                        [myComplexQuery addFilterPredicate: albumNamePredicate];
+                        MPMediaItemCollection *collection = [[MPMediaItemCollection alloc] initWithItems:[myComplexQuery items]];
+                        NSMutableArray *hostSongs = [[NSMutableArray alloc] init];
+                        for(MPMediaItem *item in collection.items){
+                            //host songstruct includes url/buffer. Client songs do not
+                            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:nil songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+                            [hostSongs addObject:tempSong];
+                            
+                           
+                        }
+                        [mainView updatePlayerQueueWithMediaCollection: hostSongs];
+                        
+                        for(MCSession *tempSession in sessions){
+                            //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
+                            NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
+                            for(MCPeerID *peer in tempSession.connectedPeers){
+                                if(peer != peerID){
+                                    [idsToSend addObject:peer];
+                                }
+                            }
+                            [self sendData:data toPeers:idsToSend reliable:YES error:nil];
+                        }
+                    }
+
+                    else{
+                            
+                    }
+                    
+                    NSLog(@"Adding song %@ to queueTable",tempID);
+                    [queueTable.addedSongs setObject:item forKey:tempID];
+                    [queueTable addedSong];
+                    
+                }
+                else{
+                    //if we have it qeued already, increment vote count
+                    SongStruct *temp = [queueTable.addedSongs objectForKey:tempID];
+                    [temp Vote];
+                }
+                
+            }
+        }
+    
     }
-    //if it doesnt have the itunes message, then it was playlist data
     else{
-        //handling of adding songs should be the same on QTVC for both server and client
-        UINavigationController *navController = self.tabBarController.viewControllers[1];
-        QueueTableViewController *queueTable = navController.viewControllers[0];
-        for (SongStruct *item in newPlaylist) {
-            //if we dont have have the song, query for it in our library, then add it
-            NSString *tempID = [NSString stringWithFormat:@"%@",item.strIdentifier];
+        //we recieved an MPMediaCollection
+        //if we're host, add it to our queue
+        if(self.advertisingSwitch.on)
+            [mainView updatePlayerQueueWithMediaCollection:newPlaylist];
+        
+        for(MPMediaItem *item in [(MPMediaItemCollection *)newPlaylist items]){
+            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:Nil songURL:(NSURL *)MPMediaItemPropertyAssetURL albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+            
+            NSString *tempID = [NSString stringWithFormat:@"%@",tempSong.strIdentifier];
             if([queueTable.addedSongs objectForKey:tempID] == nil){
                 NSLog(@"Adding song %@ to queueTable",tempID);
                 [queueTable.addedSongs setObject:item forKey:tempID];
                 [queueTable addedSong];
-                
-                if(self.advertisingSwitch.on){//if we're hosting the playlist
-                    UINavigationController *navController = self.tabBarController.viewControllers[0];
-                    QueueViewController *mainView = navController.viewControllers[0];
-                    MPMediaPropertyPredicate *artistNamePredicate =
-                    [MPMediaPropertyPredicate predicateWithValue: item.artist
-                                                     forProperty: MPMediaItemPropertyArtist
-                                                  comparisonType:MPMediaPredicateComparisonEqualTo];
-                    NSLog(@"%@",item.artist);
-                    MPMediaPropertyPredicate *albumNamePredicate =
-                    [MPMediaPropertyPredicate predicateWithValue: item.title
-                                                     forProperty: MPMediaItemPropertyTitle
-                                                  comparisonType:MPMediaPredicateComparisonEqualTo];
-                    NSLog(@"%@",item.title);
-                    MPMediaQuery *myComplexQuery = [[MPMediaQuery alloc] init];
-                    
-                    [myComplexQuery addFilterPredicate: artistNamePredicate];
-                    [myComplexQuery addFilterPredicate: albumNamePredicate];
-                    MPMediaItemCollection *collection = [[MPMediaItemCollection alloc] initWithItems:[myComplexQuery items]];
-                    [mainView updatePlayerQueueWithMediaCollection: collection];
-                    for(MCSession *tempSession in sessions){
-                        //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
-                        NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
-                        for(MCPeerID *peer in tempSession.connectedPeers){
-                            if(peer != peerID){
-                                [idsToSend addObject:peer];
-                            }
-                        }
-                        [self sendData:data toPeers:idsToSend reliable:YES error:nil];
-                    }
-                }
             }
             else{
                 //if we have it qeued already, increment vote count
                 SongStruct *temp = [queueTable.addedSongs objectForKey:tempID];
                 [temp Vote];
             }
-   
+        }
+
+        for(MCSession *tempSession in sessions){
+            //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
+            NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
+            for(MCPeerID *peer in tempSession.connectedPeers){
+                if(peer != peerID){
+                    [idsToSend addObject:peer];
+                }
+            }
+            [self sendData:data toPeers:idsToSend reliable:YES error:nil];
         }
     }
-
+    
 }
 
 //tableView methods

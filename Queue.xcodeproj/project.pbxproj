@@ -18,7 +18,6 @@
 		AA87038218626EB00062A25C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA87038018626EB00062A25C /* InfoPlist.strings */; };
 		AA87038418626EB00062A25C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AA87038318626EB00062A25C /* main.m */; };
 		AA87038818626EB00062A25C /* QueueAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AA87038718626EB00062A25C /* QueueAppDelegate.m */; };
-		AA87038B18626EB00062A25C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA87038918626EB00062A25C /* Main.storyboard */; };
 		AA87038E18626EB00062A25C /* QueueViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AA87038D18626EB00062A25C /* QueueViewController.m */; };
 		AA87039018626EB00062A25C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87038F18626EB00062A25C /* Images.xcassets */; };
 		AA87039718626EB10062A25C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA87039618626EB10062A25C /* XCTest.framework */; };
@@ -38,7 +37,10 @@
 		AAA82245187881B400F55CE3 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82244187881B400F55CE3 /* FXBlurView.m */; };
 		AAA822471878893F00F55CE3 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAA822461878893F00F55CE3 /* Accelerate.framework */; };
 		AAA8224D187F5EC200F55CE3 /* CurrentPlaylist.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAA8224C187F5EC200F55CE3 /* CurrentPlaylist.plist */; };
-		AAA82256187FC62500F55CE3 /* MySidePanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82255187FC62500F55CE3 /* MySidePanelViewController.m */; };
+		AAA8225E187FD3AC00F55CE3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AAA8225D187FD3AC00F55CE3 /* Main.storyboard */; };
+		AAA82261187FDB1900F55CE3 /* UIViewController+JASidePanel.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82260187FDB1900F55CE3 /* UIViewController+JASidePanel.m */; };
+		AAA82264187FDB3200F55CE3 /* JASidePanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82263187FDB3200F55CE3 /* JASidePanelController.m */; };
+		AAA82267187FE61500F55CE3 /* LeftPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAA82266187FE61500F55CE3 /* LeftPanelViewController.m */; };
 		AABFC8051863165500AF22B4 /* no_artwork.png in Resources */ = {isa = PBXBuildFile; fileRef = AABFC8041863165500AF22B4 /* no_artwork.png */; };
 /* End PBXBuildFile section */
 
@@ -71,7 +73,6 @@
 		AA87038518626EB00062A25C /* Queue-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Queue-Prefix.pch"; sourceTree = "<group>"; };
 		AA87038618626EB00062A25C /* QueueAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QueueAppDelegate.h; sourceTree = "<group>"; };
 		AA87038718626EB00062A25C /* QueueAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QueueAppDelegate.m; sourceTree = "<group>"; };
-		AA87038A18626EB00062A25C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AA87038C18626EB00062A25C /* QueueViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QueueViewController.h; sourceTree = "<group>"; };
 		AA87038D18626EB00062A25C /* QueueViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QueueViewController.m; sourceTree = "<group>"; };
 		AA87038F18626EB00062A25C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -94,8 +95,13 @@
 		AAA82244187881B400F55CE3 /* FXBlurView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXBlurView.m; sourceTree = "<group>"; };
 		AAA822461878893F00F55CE3 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		AAA8224C187F5EC200F55CE3 /* CurrentPlaylist.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CurrentPlaylist.plist; sourceTree = "<group>"; };
-		AAA82254187FC62500F55CE3 /* MySidePanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MySidePanelViewController.h; sourceTree = "<group>"; };
-		AAA82255187FC62500F55CE3 /* MySidePanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MySidePanelViewController.m; sourceTree = "<group>"; };
+		AAA8225D187FD3AC00F55CE3 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		AAA8225F187FDB1900F55CE3 /* UIViewController+JASidePanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+JASidePanel.h"; sourceTree = "<group>"; };
+		AAA82260187FDB1900F55CE3 /* UIViewController+JASidePanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+JASidePanel.m"; sourceTree = "<group>"; };
+		AAA82262187FDB3200F55CE3 /* JASidePanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JASidePanelController.h; sourceTree = "<group>"; };
+		AAA82263187FDB3200F55CE3 /* JASidePanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JASidePanelController.m; sourceTree = "<group>"; };
+		AAA82265187FE61500F55CE3 /* LeftPanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeftPanelViewController.h; sourceTree = "<group>"; };
+		AAA82266187FE61500F55CE3 /* LeftPanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeftPanelViewController.m; sourceTree = "<group>"; };
 		AABFC8041863165500AF22B4 /* no_artwork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = no_artwork.png; sourceTree = "<group>"; };
 		AAE8957A1867BBD700E55A95 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -168,13 +174,18 @@
 		AA87037D18626EB00062A25C /* Queue */ = {
 			isa = PBXGroup;
 			children = (
-				AAA82254187FC62500F55CE3 /* MySidePanelViewController.h */,
-				AAA82255187FC62500F55CE3 /* MySidePanelViewController.m */,
+				AAA8226818806BAE00F55CE3 /* iPad */,
+				AAA82262187FDB3200F55CE3 /* JASidePanelController.h */,
+				AAA82263187FDB3200F55CE3 /* JASidePanelController.m */,
+				AAA8225F187FDB1900F55CE3 /* UIViewController+JASidePanel.h */,
+				AAA82260187FDB1900F55CE3 /* UIViewController+JASidePanel.m */,
 				AA45FEE918779C6B0094F0EC /* BTLEViewController.h */,
 				AA45FEE718779C2E0094F0EC /* BTLEViewController.m */,
+				AAA8225D187FD3AC00F55CE3 /* Main.storyboard */,
 				AA87038618626EB00062A25C /* QueueAppDelegate.h */,
 				AA87038718626EB00062A25C /* QueueAppDelegate.m */,
-				AA87038918626EB00062A25C /* Main.storyboard */,
+				AAA82265187FE61500F55CE3 /* LeftPanelViewController.h */,
+				AAA82266187FE61500F55CE3 /* LeftPanelViewController.m */,
 				AAA82243187881B400F55CE3 /* FXBlurView.h */,
 				AAA82244187881B400F55CE3 /* FXBlurView.m */,
 				AA87038C18626EB00062A25C /* QueueViewController.h */,
@@ -228,6 +239,13 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		AAA8226818806BAE00F55CE3 /* iPad */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = iPad;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -276,6 +294,14 @@
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = Ethan;
 				TargetAttributes = {
+					AA87037318626EB00062A25C = {
+						DevelopmentTeam = 8X5P8C448L;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+					};
 					AA87039418626EB10062A25C = {
 						TestTargetID = AA87037318626EB00062A25C;
 					};
@@ -310,11 +336,11 @@
 				AA8703B71862756E0062A25C /* pause_button@2x.png in Resources */,
 				AABFC8051863165500AF22B4 /* no_artwork.png in Resources */,
 				AA8703B91862756E0062A25C /* play_button@2x.png in Resources */,
+				AAA8225E187FD3AC00F55CE3 /* Main.storyboard in Resources */,
 				AA87039018626EB00062A25C /* Images.xcassets in Resources */,
 				AA595CAB186DAE4700426227 /* Mobile_Signal.png in Resources */,
 				AA8703CD1862D1200062A25C /* background.jpg in Resources */,
 				AA87038218626EB00062A25C /* InfoPlist.strings in Resources */,
-				AA87038B18626EB00062A25C /* Main.storyboard in Resources */,
 				AAA8224D187F5EC200F55CE3 /* CurrentPlaylist.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -336,10 +362,12 @@
 			files = (
 				AA87038E18626EB00062A25C /* QueueViewController.m in Sources */,
 				AA45FE951871FC700094F0EC /* LibraryViewController.m in Sources */,
-				AAA82256187FC62500F55CE3 /* MySidePanelViewController.m in Sources */,
 				AA595CA4186D3E0B00426227 /* SongStruct.m in Sources */,
 				AA8703C51862A6BE0062A25C /* QueueTableViewController.m in Sources */,
+				AAA82264187FDB3200F55CE3 /* JASidePanelController.m in Sources */,
+				AAA82261187FDB1900F55CE3 /* UIViewController+JASidePanel.m in Sources */,
 				AA45FEE818779C2E0094F0EC /* BTLEViewController.m in Sources */,
+				AAA82267187FE61500F55CE3 /* LeftPanelViewController.m in Sources */,
 				AAA82245187881B400F55CE3 /* FXBlurView.m in Sources */,
 				AA87038818626EB00062A25C /* QueueAppDelegate.m in Sources */,
 				AA87038418626EB00062A25C /* main.m in Sources */,
@@ -371,14 +399,6 @@
 				AA87038118626EB00062A25C /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		AA87038918626EB00062A25C /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				AA87038A18626EB00062A25C /* Base */,
-			);
-			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 		AA87039F18626EB10062A25C /* InfoPlist.strings */ = {
@@ -469,10 +489,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Queue/Queue-Prefix.pch";
 				INFOPLIST_FILE = "Queue/Queue-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -482,10 +507,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Queue/Queue-Prefix.pch";
 				INFOPLIST_FILE = "Queue/Queue-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

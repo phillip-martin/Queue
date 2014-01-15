@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "QueueAppDelegate.h"
+#import "LeftPanelViewController.h"
+#import "SongStruct.h"
 
 @implementation QueueAppDelegate
 
@@ -17,11 +19,56 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
-    UIViewController *vc = [storyboard instantiateInitialViewController];
     
-    // Set root view controller and make windows visible
-    self.window.rootViewController = vc;
+    self.viewController = [[JASidePanelController alloc] init];
+    self.viewController.shouldDelegateAutorotateToVisiblePanel = NO;
+    LeftPanelViewController *leftPanel = [storyboard instantiateViewControllerWithIdentifier:@"leftViewController"];
+	self.viewController.leftPanel = leftPanel;
+    [leftPanel setBTLE:[storyboard instantiateViewControllerWithIdentifier:@"BTLEController"]];
+    
+    [leftPanel setQVC:[storyboard instantiateViewControllerWithIdentifier:@"nowPlayingController"]];
+    
+    [leftPanel setQTVC:[storyboard instantiateViewControllerWithIdentifier:@"centerViewController"]];
+    
+	self.viewController.centerPanel = [[UINavigationController alloc] initWithRootViewController:[leftPanel QTVC]];
+	
+    /*[[UINavigationBar appearance] setTitleTextAttributes:
+     [NSDictionary dictionaryWithObjectsAndKeys:
+      [UIColor colorWithRed:255.0/255.0 green:255.0/255.0 blue:255.0/255.0 alpha:1.0],
+      NSForegroundColorAttributeName,
+      [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8],
+      NSShadowAttributeName,
+      [NSValue valueWithUIOffset:UIOffsetMake(0, -1)],
+      NSShadowAttributeName,
+      [UIFont fontWithName:@"Arial-Bold" size:0.0],
+      NSFontAttributeName,
+      nil]];*/
+    
+	self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
+    
+    //initialize all of QVC's data required to function
+    [leftPanel QVC].myLibrary = [[NSMutableArray alloc] init];
+    [leftPanel QVC].songQueue = [[NSMutableArray alloc] init];
+    [leftPanel QVC].appPlayer = [[AVPlayer alloc] init];
+    
+    //initialize all of QTVC's data required to function
+    [leftPanel QTVC].addedSongs = [[NSMutableDictionary alloc] init];
+    
+    //load our itunes library regardless of whether we are a host or not
+    MPMediaQuery *everything = [[MPMediaQuery alloc] init];
+    
+    NSLog(@"Logging items from a generic query...");
+    NSArray *itemsFromGenericQuery = [everything items];
+    
+    for (MPMediaItem *song in itemsFromGenericQuery) {
+        NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyTitle],@"title")];
+        NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyArtist],@"artist")];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0 bufferData:nil songURL:(NSURL *)[song valueForProperty:MPMediaItemPropertyAssetURL] albumArtwork:[song valueForProperty:MPMediaItemPropertyArtwork]];
+        [[[leftPanel QVC] myLibrary] addObject:newSong];
+        NSLog (@"%@", tempTitle);
+    }
+    NSLog(@"%lul songs loaded from library",(unsigned long)[[[leftPanel QVC] myLibrary] count]);
     
     return YES;
 }

@@ -6,9 +6,11 @@
 //  Copyright (c) 2013 Ethan. All rights reserved.
 //
 
+#import "JASidePanelController.h"
+#import "UIViewController+JASidePanel.h"
 #import "QueueViewController.h"
-#import "SongStruct.h"
-#import "BTLEViewController.h"
+#import "QueueTableViewController.h"
+#import "QuartzCore/CALayer.h"
 #import <MediaPlayer/MediaPlayer.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -16,85 +18,11 @@
 
 @end
 
-// Audio session callback function for responding to audio route changes. If playing
-//		back application audio when the headset is unplugged, this callback pauses
-//		playback and displays an alert that allows the user to resume or stop playback.
-//
-//		The system takes care of iPod audio pausing during route changes--this callback
-//		is not involved with pausing playback of iPod audio.
-void audioRouteChangeListenerCallback (
-                                       void                      *inUserData,
-                                       AudioSessionPropertyID    inPropertyID,
-                                       UInt32                    inPropertyValueSize,
-                                       const void                *inPropertyValue
-                                       ) {
-	
-	// ensure that this callback was invoked for a route change
-	if (inPropertyID != kAudioSessionProperty_AudioRouteChange) return;
-    
-	// This callback, being outside the implementation block, needs a reference to the
-	//		MainViewController object, which it receives in the inUserData parameter.
-	//		You provide this reference when registering this callback (see the call to
-	//		AudioSessionAddPropertyListener).
-	QueueViewController *controller = (__bridge QueueViewController *) inUserData;
-	
-	// if application sound is not playing, there's nothing to do, so return.
-	if (controller.appPlayer.playing == 0 ) {
-        
-		NSLog (@"Audio route change while application audio is stopped.");
-		return;
-		
-	} else {
-        
-		// Determines the reason for the route change, to ensure that it is not
-		//		because of a category change.
-		CFDictionaryRef	routeChangeDictionary = inPropertyValue;
-		
-		CFNumberRef routeChangeReasonRef =
-        CFDictionaryGetValue (
-                              routeChangeDictionary,
-                              CFSTR (kAudioSession_AudioRouteChangeKey_Reason)
-                              );
-        
-		SInt32 routeChangeReason;
-		
-		CFNumberGetValue (
-                          routeChangeReasonRef,
-                          kCFNumberSInt32Type,
-                          &routeChangeReason
-                          );
-		
-		// "Old device unavailable" indicates that a headset was unplugged, or that the
-		//	device was removed from a dock connector that supports audio output. This is
-		//	the recommended test for when to pause audio.
-		if (routeChangeReason == kAudioSessionRouteChangeReason_OldDeviceUnavailable) {
-            
-			[controller.mainPlayer pause];
-			NSLog (@"Output device removed, so application audio was paused.");
-            
-			UIAlertView *routeChangeAlertView =
-            [[UIAlertView alloc]	initWithTitle: NSLocalizedString (@"Playback Paused", @"Title for audio hardware route-changed alert view")
-                                       message: NSLocalizedString (@"Audio output was changed", @"Explanation for route-changed alert view")
-                                      delegate: controller
-                             cancelButtonTitle: NSLocalizedString (@"StopPlaybackAfterRouteChange", @"Stop button title")
-                             otherButtonTitles: NSLocalizedString (@"ResumePlaybackAfterRouteChange", @"Play button title"), nil];
-			[routeChangeAlertView show];
-			// release takes place in alertView:clickedButtonAtIndex: method
-            
-		} else {
-            
-			NSLog (@"A route change occurred that does not require pausing of application audio.");
-		}
-	}
-}
-
-
 
 @implementation QueueViewController
 
 @synthesize songQueue;
 @synthesize soundFileURL;
-@synthesize mainPlayer;
 @synthesize appPlayer;
 @synthesize voteCount;
 @synthesize nowPlayingItem;
@@ -106,85 +34,55 @@ void audioRouteChangeListenerCallback (
 @synthesize playing;
 @synthesize interruptedOnPlayback;
 @synthesize myLibrary;
+@synthesize minLabel;
+@synthesize maxLabel;
 
-
--(id)init
-{
-    self = [super self];
-    
-    return self;
+-(void)handleRouteChange:(NSNotification*)notification{
+    //AVAudioSession *session = [ AVAudioSession sharedInstance ];
+    NSString* seccReason = @"";
+    NSInteger  reason = [[[notification userInfo] objectForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
+    //  AVAudioSessionRouteDescription* prevRoute = [[notification userInfo] objectForKey:AVAudioSessionRouteChangePreviousRouteKey];
+    switch (reason) {
+        case AVAudioSessionRouteChangeReasonNoSuitableRouteForCategory:
+            seccReason = @"The route changed because no suitable route is now available for the specified category.";
+            [appPlayer pause];
+            break;
+        case AVAudioSessionRouteChangeReasonWakeFromSleep:
+            seccReason = @"The route changed when the device woke up from sleep.";
+            break;
+        case AVAudioSessionRouteChangeReasonOverride:
+            seccReason = @"The output route was overridden by the app.";
+            break;
+        case AVAudioSessionRouteChangeReasonCategoryChange:
+            seccReason = @"The category of the session object changed.";
+            break;
+        case AVAudioSessionRouteChangeReasonOldDeviceUnavailable:
+            seccReason = @"The previous audio output path is no longer available.";
+            [appPlayer pause];
+            break;
+        case AVAudioSessionRouteChangeReasonNewDeviceAvailable:
+            seccReason = @"A preferred new audio output path is now available.";
+            [appPlayer play];
+            break;
+        case AVAudioSessionRouteChangeReasonUnknown:
+        default:
+            seccReason = @"The reason for the change is unknown.";
+            break;
+    }
+    //AVAudioSessionPortDescription *input = [[session.currentRoute.inputs count]?session.currentRoute.inputs:nil objectAtIndex:0];
 }
 
 
-- (void) handle_NowPlayingItemChanged: (id) notification {
-    
-    MPMediaItem *currentItem = [mainPlayer nowPlayingItem];
-    // Assume that there is no artwork for the media item.
-    [artworkItem setImage:[UIImage imageNamed:@"no_artwork.png"]];
-    
-    // Get the artwork from the current media item, if it has artwork.
-    MPMediaItemArtwork *artwork = [currentItem valueForProperty: MPMediaItemPropertyArtwork];
-    
-    // Obtain a UIImage object from the MPMediaItemArtwork object
-    if (artwork) {
-        artworkItem.image = [artwork imageWithSize: CGSizeMake (250, 250)];
-    }
-    
-    
-    // Display the artist and song name for the now-playing media item
-    [nowPlayingLabel setText: [
-                               NSString stringWithFormat: @"%@", NSLocalizedString([currentItem valueForProperty: MPMediaItemPropertyTitle], @"song title")]];
-     [artistLabel setText: [ NSString stringWithFormat:@"%@", NSLocalizedString([currentItem valueForProperty: MPMediaItemPropertyArtist], @"artist")]];
-    
-    if (mainPlayer.playbackState == MPMusicPlaybackStateStopped) {
-        // Provide a suitable prompt to the user now that their chosen music has
-        //		finished playing.
-        [nowPlayingLabel setText: [
-                                   NSString stringWithFormat: @"%@",
-                                   NSLocalizedString (@"", @"Label for prompting user to play music again after it has stopped")]];
-        
-    }
-}
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+        
+    [self viewSetup];
     
-    mainPlayer = [MPMusicPlayerController iPodMusicPlayer];
-    myLibrary = [[NSMutableArray alloc] init];
-    
-    
-    [songProgress setValue:[mainPlayer currentPlaybackTime] animated:YES];
-    [artworkItem setImage:[UIImage imageNamed:@"no_artwork.png"]];
-	[nowPlayingLabel setText: NSLocalizedString (@"", @"Brief instructions to user, shown at launch")];
-    [artistLabel setText:NSLocalizedString(@"", @"Artist")];
     [self registerForMediaPlayerNotifications];
     
-    self.tabBarItem.image = [UIImage imageNamed:@"no_artwork.png"];
-    self.tabBarItem.title = @"Now Playing";
-    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"background.jpg"]]];
-    [self setMainPlayer: [MPMusicPlayerController applicationMusicPlayer]];
     
-    // By default, an application music player takes on the shuffle and repeat modes
-    //		of the built-in iPod app. Here they are both turned off.
-    [mainPlayer setShuffleMode: MPMusicShuffleModeOff];
-    [mainPlayer setRepeatMode: MPMusicRepeatModeNone];
-    
-    //load our itunes library regardless of whether we are a host or not
-    MPMediaQuery *everything = [[MPMediaQuery alloc] init];
-    
-    NSLog(@"Logging items from a generic query...");
-    NSArray *itemsFromGenericQuery = [everything items];
-    
-    for (MPMediaItem *song in itemsFromGenericQuery) {
-        NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyTitle],@"title")];
-        NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyArtist],@"artist")];
-        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0];
-        [myLibrary addObject:newSong];
-         NSLog (@"%@", tempTitle);
-    }
-    NSLog(@"%lul songs loaded from library",(unsigned long)[myLibrary count]);
-
 }
 
 // If the music player was paused, leave it paused. If it was playing, it will continue to
@@ -193,54 +91,71 @@ void audioRouteChangeListenerCallback (
 //		launch--in which case, invoke play.
 - (void) restorePlaybackState {
     
-	if (mainPlayer.playbackState == MPMusicPlaybackStateStopped && songQueue) {
+	if (appPlayer.rate != 0.0f && songQueue) {
 		
-		[mainPlayer play];
+		[appPlayer play];
 	}
     
 }
 
 - (void) registerForMediaPlayerNotifications {
     
-	NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
-	[notificationCenter addObserver: self
+    
+	/*[[NSNotificationCenter defaultCenter] addObserver: self
 						   selector: @selector (handle_NowPlayingItemChanged:)
 							   name: MPMusicPlayerControllerNowPlayingItemDidChangeNotification
-							 object: mainPlayer];
-    [mainPlayer beginGeneratingPlaybackNotifications];
-}
-
-- (IBAction) playAppSound: (id) sender {
+							 object: mainPlayer];*/
     
-	[mainPlayer play];
-	playing = YES;
-	[pausePlay setEnabled: NO];
-}
-
-// delegate method for the audio route change alert view; follows the protocol specified
-//	in the UIAlertViewDelegate protocol.
-- (void) alertView: routeChangeAlertView clickedButtonAtIndex: buttonIndex {
+    [[NSNotificationCenter defaultCenter]  addObserver: self
+                        selector: @selector(handleRouteChange:)
+                         name: AVAudioSessionRouteChangeNotification
+                            object: appPlayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(audioPlayerDidFinishPlaying:)
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:appPlayer.currentItem];
     
-	if ((NSInteger) buttonIndex == 1) {
-		[mainPlayer play];
-	} else {
-		[appPlayer setCurrentTime: 0];
-		[pausePlay setEnabled: YES];
-	}
-	
+    /*[notificationCenter addObserver: self
+                          selector: @selector(handleInterruption:)
+                           name: AVAudioSessionInterruptionNotification
+                          object: session];*/
+    
 }
 
+#pragma mark resize image method
+-(UIImage *)resizeimage:(UIImage *)image toSize:(CGSize)size{
+    UIGraphicsBeginImageContext( size );
+    CGRect rect = CGRectMake(0, 0, size.width, size.height);
+    if([image respondsToSelector:@selector(drawInRect:)]){
+        [image drawInRect:rect];
+        UIImage *picture1 = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        NSData *imageData = UIImagePNGRepresentation(picture1);
+        UIImage *img=[UIImage imageWithData:imageData];
+        return img;
 
+    }
+    else{
+        return [(MPMediaItemArtwork *)image imageWithSize:size];
+    }
+}
 
 #pragma mark AV Foundation delegate methods____________
 
-- (void) audioPlayerDidFinishPlaying: (AVAudioPlayer *) appSoundPlayer successfully: (BOOL) flag {
+- (void) audioPlayerDidFinishPlaying:(NSNotification *)notification {
+    
+    NSLog(@"finished playing song");
+    if(audioTimer)
+        [audioTimer invalidate];
     
 	playing = NO;
-	[pausePlay setEnabled: YES];
+    [songQueue removeObjectAtIndex:0];
+    [appPlayer removeObserver:self forKeyPath:@"status"];
+    [self nextSong];
+	
 }
-
 
 
 - (void) audioPlayerBeginInterruption: player {
@@ -263,7 +178,7 @@ void audioRouteChangeListenerCallback (
 	
 	if (interruptedOnPlayback) {
         
-		[mainPlayer play];
+		[appPlayer play];
 		playing = YES;
 		interruptedOnPlayback = NO;
 	}
@@ -275,124 +190,130 @@ void audioRouteChangeListenerCallback (
     // Dispose of any resources that can be recreated.
 }
 
+-(void)audioProgressUpdate{
+    if (appPlayer != nil){
+        double currentTime = CMTimeGetSeconds(appPlayer.currentItem.currentTime);
+        double duration = CMTimeGetSeconds(appPlayer.currentItem.duration);
+        NSLog(@"progress: %f",currentTime/duration);
+        [songProgress setProgress:currentTime/duration];
+        minLabel.text = [NSString stringWithFormat: @"%02d:%02d", (int)currentTime / 60, (int)currentTime % 60];
+        maxLabel.text = [NSString stringWithFormat: @"%02d:%02d", (int)duration / 60, (int)duration % 60];
+    }
+}
+
 -(IBAction)pauseOrPlayMusic:(id)sender
 {
-    MPMusicPlaybackState playbackState = [mainPlayer playbackState];
     
-	if (playbackState == MPMusicPlaybackStateStopped || playbackState == MPMusicPlaybackStatePaused) {
-		[mainPlayer play];
-        [pausePlay setImage:[UIImage imageNamed:@"play_button.png"] forState:UIControlStateSelected];
-	} else if (playbackState == MPMusicPlaybackStatePlaying) {
-		[mainPlayer pause];
-        [pausePlay setImage:[UIImage imageNamed:@"pause_button.png"] forState:UIControlStateSelected];
-	}
+    if(appPlayer.currentItem != nil){
+        if(appPlayer.rate != 0.0f){
+            [appPlayer pause];
+            [pausePlay setImage:[UIImage imageNamed:@"play_button.png"] forState:UIControlStateNormal];
+        }
+        else{
+            [appPlayer play];
+            [pausePlay setImage:[UIImage imageNamed:@"pause_button.png"] forState:UIControlStateNormal];
+        }
+    }
 }
 
-- (void) setupApplicationAudio {
-	
-	// Gets the file system path to the sound to play.
-	NSString *soundFilePath = [[NSBundle mainBundle]	pathForResource:	@"sound"
-                                                              ofType:				@"caf"];
+-(void)nextSong{
+    if([songQueue count] > 0){
+        NSLog(@"Next song");
+        SongStruct *song = [songQueue objectAtIndex:0];
+        
+        AVAsset *songAsset = [AVAsset assetWithURL:[song mediaURL]];
+        AVPlayerItem *nextItem = [[AVPlayerItem alloc] initWithAsset:songAsset];
+        appPlayer = [AVPlayer playerWithPlayerItem:nextItem];
+        [appPlayer addObserver:self forKeyPath:@"status" options:0 context:nil]; // add observer for player
+        [appPlayer setVolume: 1.0];
+        
+        SongStruct *currentItem = [songQueue objectAtIndex:0];
+        nowPlayingItem = currentItem;
+        [self registerForMediaPlayerNotifications];
+    }
+    else{
+        nowPlayingItem = nil;
+    }
+    [self viewSetup];
     
-	// Converts the sound's file path to an NSURL object
-	NSURL *newURL = [[NSURL alloc] initFileURLWithPath: soundFilePath];
-	self.soundFileURL = newURL;
-    
-	// Registers this class as the delegate of the audio session.
-	[[AVAudioSession sharedInstance] setDelegate: self];
-	
-	// The AmbientSound category allows application audio to mix with Media Player
-	// audio. The category also indicates that application audio should stop playing
-	// if the Ring/Siilent switch is set to "silent" or the screen locks.
-	//[[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryAmbient error: nil];
-    
-     // Use this code instead to allow the app sound to continue to play when the screen is locked.
-     [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayback error: nil];
-     
-     UInt32 doSetProperty = 0;
-     AudioSessionSetProperty (
-     kAudioSessionProperty_OverrideCategoryMixWithOthers,
-     sizeof (doSetProperty),
-     &doSetProperty
-     );
-    
-    
-	// Registers the audio route change listener callback function
-	AudioSessionAddPropertyListener (
-                                     kAudioSessionProperty_AudioRouteChange,
-                                     audioRouteChangeListenerCallback,
-                                     (__bridge void *)(self)
-                                     );
-    
-	// Activates the audio session.
-	
-	NSError *activationError = nil;
-	[[AVAudioSession sharedInstance] setActive: YES error: &activationError];
-    
-	
-	// "Preparing to play" attaches to the audio hardware and ensures that playback
-	//		starts quickly when the user taps Play
-	[appPlayer prepareToPlay];
-	[appPlayer setVolume: 1.0];
-	[appPlayer setDelegate: self];
 }
 
+-(void)viewSetup{
+    if([songQueue count] > 0){
+        [pausePlay setImage:[UIImage imageNamed:@"pause_button.png"] forState:UIControlStateNormal];
+        [artworkItem setImage:nil];
+        
+        // Get the artwork from the current media item, if it has artwork.
+        UIImage *artwork = [nowPlayingItem artwork];
+        
+        // Obtain a UIImage object from the MPMediaItemArtwork object
+        if (artwork) {
+            artworkItem.image = [self resizeimage:artwork toSize:CGSizeMake (280, 280)];
+            
+            UIColor *background = [[UIColor alloc] initWithPatternImage:[self resizeimage:artwork toSize:CGSizeMake(1000, 1000)]];
+            [self.view setBackgroundColor:background];
+        }
+        
+        // Display the artist and song name for the now-playing media item
+        [nowPlayingLabel setText: [nowPlayingItem title]];
+        [artistLabel setText: [nowPlayingItem artist]];
+    }
+    else{
+        artworkItem.image = nil;
+        [pausePlay setImage:[UIImage imageNamed:@"play_button.png"] forState:UIControlStateNormal];
+        [nowPlayingLabel setText: NSLocalizedString (@"", @"Brief instructions to user, shown at launch")];
+        [artistLabel setText:NSLocalizedString(@"", @"Artist")];
+        [minLabel setText:@"00:00"];
+        [maxLabel setText:@"--:--"];
+        [songProgress setProgress:0];
+        [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"background.jpg"]]];
+    }
+}
 
-- (void) updatePlayerQueueWithMediaCollection: (MPMediaItemCollection *) mediaItemCollection {
+- (void) updatePlayerQueueWithMediaCollection: (NSArray *) mediaItemCollection {
     
 	// Configure the music player, but only if the user chose at least one song to play
     
 	if (mediaItemCollection) {
-        
-		// If there's no playback queue yet...
-		if (songQueue == nil) {
-            
-            [self setSongQueue:mediaItemCollection];
-			[mainPlayer setQueueWithItemCollection: songQueue];
-			[mainPlayer play];
-            
-            // Obtain the music player's state so it can then be
-            //		restored after updating the playback queue.
-		} else {
-            
-			// Take note of whether or not the music player is playing. If it is
-			//		it needs to be started again at the end of this method.
-			BOOL wasPlaying = NO;
-             if (mainPlayer.playbackState == MPMusicPlaybackStatePlaying) {
-             wasPlaying = YES;
-             }
-			
-			// Save the now-playing item and its current playback time.
-			MPMediaItem *nowPlaying			= mainPlayer.nowPlayingItem;
-			NSTimeInterval currentPlaybackTime	= mainPlayer.currentPlaybackTime;
-            
-			// Combine the previously-existing media item collection with the new one
-			NSMutableArray *combinedMediaItems	= [[songQueue items] mutableCopy];
-			NSArray *newMediaItems				= [mediaItemCollection items];
-			[combinedMediaItems addObjectsFromArray: newMediaItems];
-			
-            [self setSongQueue:[MPMediaItemCollection collectionWithItems: combinedMediaItems]];
-			[mainPlayer setQueueWithItemCollection: songQueue];
-            
-			// Apply the new media item collection as a playback queue for the music player.
-			[mainPlayer setQueueWithItemCollection: songQueue];
-			
-			// Restore the now-playing item and its current playback time.
-			mainPlayer.nowPlayingItem			= nowPlaying;
-			mainPlayer.currentPlaybackTime		= currentPlaybackTime;
-			
-			// If the music player was playing, get it playing again.
-			if (wasPlaying) {
-             [mainPlayer play];
-             
-             }
-            
+
+        [songQueue addObjectsFromArray:mediaItemCollection];
+        NSLog(@"%u",[songQueue count]);
+        //if not playing
+        if(appPlayer.currentItem == nil){
+            [self nextSong];
         }
+            
     }
     
 }
-     
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if ([object isKindOfClass:[AVPlayer class]])
+    {
+        AVPlayer *item = (AVPlayer *)object;
+        
+        if ([keyPath isEqualToString:@"status"])
+        {
+            switch(item.status)
+            {
+                case AVPlayerItemStatusFailed:
+                    NSLog(@"AV player item failed");
+                    //skip to next song if current song failed
+                    [songQueue removeObjectAtIndex:0];
+                    [self nextSong];
+                case AVPlayerItemStatusReadyToPlay:
+                    [appPlayer play];
+                    audioTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(audioProgressUpdate) userInfo:nil repeats:YES];
+                    NSLog(@"player item status is ready to play");
+                    break;
+                case AVPlayerItemStatusUnknown:
+                    NSLog(@"player item status is unknown");
+                    break;
+            }
+        }
+    }
+}
 
 @end
 

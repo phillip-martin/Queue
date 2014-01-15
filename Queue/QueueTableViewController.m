@@ -6,9 +6,12 @@
 //  Copyright (c) 2013 Ethan. All rights reserved.
 //
 
+#import "JASidePanelController.h"
+#import "UIViewController+JASidePanel.h"
 #import "QueueTableViewController.h"
-#import "QueueViewController.h"
 #import "BTLEViewController.h"
+#import "QueueViewController.h"
+#import "LeftPanelViewController.h"
 #import "SongStruct.h"
 
 @implementation QueueTableViewController
@@ -19,36 +22,32 @@
 
 - (IBAction) addHandler {
     
-    UINavigationController *navBar = self.tabBarController.viewControllers[2];
-    BTLEViewController *btController = navBar.viewControllers[0];
-    
-    if(!btController.rangingSwitch.on){
-        MPMediaPickerController *mediaPicker =
-        [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
+    MPMediaPickerController *mediaPicker =
+    [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
 	
-        mediaPicker.delegate = self;
-        mediaPicker.allowsPickingMultipleItems = YES;
-        mediaPicker.prompt = NSLocalizedString (@"Add a song to the queue", @"Choose a song to add to the queue");
+    mediaPicker.delegate = self;
+    mediaPicker.allowsPickingMultipleItems = YES;
+    mediaPicker.prompt = NSLocalizedString (@"Add a song to the queue", @"Choose a song to add to the queue");
 
     
-        if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
-            [self presentViewController:mediaPicker animated:YES completion:nil];
-        } else {
-            [self presentModalViewController:mediaPicker animated:YES];
-        }
+    if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
+        [self presentViewController:mediaPicker animated:YES completion:nil];
+    } else {
+        [self presentModalViewController:mediaPicker animated:YES];
     }
     
-    else{
+    /*else{
         [self performSegueWithIdentifier:@"LibraryViewSegue" sender:self];
         
-    }
+    }*/
 }
 
 -(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSMutableArray *)songs
 {
     if([songs count] > 0){
-        UINavigationController *navController = self.tabBarController.viewControllers[2];
-        BTLEViewController *tempView = navController.viewControllers[0];
+        
+        LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+        BTLEViewController *tempView = [leftController BTLE];
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:songs];
         [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:tempView.connectedPeer, nil] reliable:YES error:nil];
         for(SongStruct *tempSong in songs){
@@ -69,11 +68,12 @@
     SongStruct *temp = [self.songArray objectAtIndex:tempButton.tag];
     [temp Vote];
     tempButton.enabled = NO; //not working
+    //[self.currentQueue cellForRowAtIndexPath:tempButton.tag] remove cell button
     [self.currentQueue reloadData];
     NSArray *tempArray = [[NSArray alloc] initWithObjects:temp, nil];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:tempArray];
-    UINavigationController *navController = self.tabBarController.viewControllers[2];
-    BTLEViewController *tempView = navController.viewControllers[0];
+    LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+    BTLEViewController *tempView = [leftController BTLE];
     if(tempView.rangingSwitch.on && tempView.connectedPeer != nil){
         [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:tempView.connectedPeer, nil] reliable:YES error:nil];
     }
@@ -86,7 +86,6 @@
 {
     [super viewDidLoad];
     
-    self.addedSongs = [[NSMutableDictionary alloc] init];
     /*NSFileManager* manager = [NSFileManager defaultManager];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentPath = [paths objectAtIndex:0];
@@ -115,19 +114,20 @@
 
 // Responds to the user tapping Done after choosing music.
 - (void) mediaPicker: (MPMediaPickerController *) mediaPicker didPickMediaItems: (MPMediaItemCollection *) mediaItemCollection {
-    
+    //dismiss picker
 	if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
         [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
     } else {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
-    UINavigationController *navBar = self.tabBarController.viewControllers[0];
-    QueueViewController *mainView = navBar.viewControllers[0];
-	[mainView updatePlayerQueueWithMediaCollection: mediaItemCollection];
+    LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+    BTLEViewController *btController = [leftController BTLE];
+    //add the songs to our queue table view
     for (int i = 0; i<mediaItemCollection.items.count; i++) {
         NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyTitle],@"title")];
         NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyArtist],@"artist")];
-        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1];
+        //note: Do not need buffer, url or album artwork for queue table. It is simply a list
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 bufferData:nil songURL:nil albumArtwork:nil];
         NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
         if([self.addedSongs objectForKey:tempID] == nil){
             [self.addedSongs setObject:newSong forKey:tempID];
@@ -136,14 +136,72 @@
             SongStruct *temp = [self.addedSongs objectForKey:tempID];
             [temp Vote];
         }
-        
     }
     [self addedSong];
-    UINavigationController *navController = self.tabBarController.viewControllers[2];
-    BTLEViewController *tempView = navController.viewControllers[0];
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.songArray];
-    [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
-    
+    if(!btController.rangingSwitch.on){
+        //get relevant data from songs and add them to the queue
+        NSMutableArray *songData = [[NSMutableArray alloc] init];
+        for(MPMediaItem *item in mediaItemCollection.items){
+            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:nil songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+            NSLog(@"%@",[newSong mediaURL]);
+            NSLog(@"%@",[item valueForProperty:MPMediaItemPropertyTitle]);
+            //we added the song to our addedSongs dictionary already, so the votecount should be 1
+            if([[self.addedSongs objectForKey:newSong.strIdentifier] votes] == 1){
+                NSLog(@"here");
+                [songData addObject:newSong];
+                
+            }
+            
+        }
+        
+        //if ranging switch is off, we are hosting a playlist.
+        QueueViewController *mainView = [leftController QVC];
+        //add picked songs to our media queue
+        [mainView updatePlayerQueueWithMediaCollection: songData];
+        //update playlist tables of all connected peers. They dont need the media data
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.songArray];
+        [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
+    }
+    else{
+        //convert MPMediaItem to NSData. This will be sent to the host. The song is played once then destroyed
+        NSMutableArray *songData = [[NSMutableArray alloc] init];
+        [songData addObject:@"song buffer"]; //message
+        for(MPMediaItem *item in mediaItemCollection.items){
+            NSMutableData *data = [[NSMutableData alloc] init];
+            
+            NSURL *url = [item valueForProperty:MPMediaItemPropertyAssetURL];
+            AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+            AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:asset error:nil];
+            const uint32_t sampleRate = 16000; // 16k sample/sec
+            const uint16_t channels = 2; // 2 channel/sample (stereo)
+            NSDictionary *settings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
+                                      [NSNumber numberWithFloat:(float)sampleRate], AVSampleRateKey,
+                                      [NSNumber numberWithFloat:(float)channels], AVNumberOfChannelsKey, nil];
+            AVAssetReaderTrackOutput *assetOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:asset.tracks[0] outputSettings:settings];
+            [assetReader addOutput:assetOutput];
+            [assetReader startReading];
+            // read the samples from the asset and append them subsequently
+            while ([assetReader status] != AVAssetReaderStatusCompleted) {
+                CMSampleBufferRef sampleBuffer = [assetOutput copyNextSampleBuffer];
+                if (sampleBuffer == NULL) continue;
+                CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+                size_t size = CMBlockBufferGetDataLength(blockBuffer);
+                uint8_t *outBytes = malloc(size);
+                CMBlockBufferCopyDataBytes(blockBuffer, 0, size, outBytes);
+                CMSampleBufferInvalidate(sampleBuffer);
+                CFRelease(sampleBuffer);
+                [data appendBytes:outBytes length:size];
+            }
+            //add data to array with message as first object. This is so the devices know how to parse the data
+
+            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:data songURL:nil albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+            [songData addObject:newSong];
+        }
+        NSData *labeledData = [NSKeyedArchiver archivedDataWithRootObject:songData];
+        [btController sendData:labeledData toPeers:[NSArray arrayWithObject:btController.connectedPeer] reliable:YES error:nil];
+        
+    }
 }
 
 -(void) mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker{
@@ -160,6 +218,7 @@
     return [self.addedSongs count];
 }
 
+//update our table view with added/edited songs
 -(void)addedSong{
     self.songArray = [self.addedSongs allValues];
 	[self.currentQueue reloadData];
@@ -187,7 +246,7 @@
         }
     }
 	titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 7.5, 230.0, 20)];
-    titleLabel.font = [UIFont systemFontOfSize:22.5];
+    titleLabel.font = [UIFont systemFontOfSize:20.0];
     titleLabel.textAlignment = NSTextAlignmentLeft;
     titleLabel.textColor = [UIColor blackColor];
     titleLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
@@ -226,10 +285,6 @@
     
 	[tableView deselectRowAtIndexPath: indexPath animated: YES];
 }
-
-
-
-
 
 
 /*
@@ -283,8 +338,8 @@
         UINavigationController *nav = segue.destinationViewController;
         LibraryViewController *LVC = nav.viewControllers[0];
         [LVC setLibraryDelegate:self];
-        UINavigationController *navController = self.tabBarController.viewControllers[2];
-        BTLEViewController *tempView = navController.viewControllers[0];
+        LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
+        BTLEViewController *tempView= [leftController BTLE];
         [LVC setLibraryData:[tempView hostLibrary]];
     }
     

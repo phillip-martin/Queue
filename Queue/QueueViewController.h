@@ -10,45 +10,48 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
-#import "QueueTableViewController.h"
+#import "SongStruct.h"
+
 
 @interface QueueViewController : UIViewController < MPMediaPickerControllerDelegate, AVAudioPlayerDelegate, UITabBarDelegate>
 {
     
     IBOutlet UIImageView *artworkItem;
-    MPMediaItemCollection *songQueue;
-    AVAudioPlayer *appPlayer;
-    MPMusicPlayerController *mainPlayer;
+    NSMutableArray *songQueue;
+    AVPlayer *appPlayer;
     NSURL *soundFileURL;
     IBOutlet UILabel *artistLabel;
     NSUInteger voteCount;
-    MPMediaItem *nowPlayingItem;
+    SongStruct *nowPlayingItem;
     IBOutlet UILabel *nowPlayingLabel;
+    IBOutlet UILabel *minLabel;
+    IBOutlet UILabel *maxLabel;
     IBOutlet UIButton *pausePlay;
-    IBOutlet UISlider *songProgress;
+    IBOutlet UIProgressView *songProgress;
     BOOL playing;
     BOOL interruptedOnPlayback;
+    NSTimer *audioTimer;
     
 }
 
 @property (nonatomic) IBOutlet UIImageView *artworkItem;
-@property (nonatomic) MPMediaItemCollection *songQueue;
-@property (nonatomic) AVAudioPlayer *appPlayer;
-@property (nonatomic) MPMusicPlayerController *mainPlayer;
+@property (nonatomic) NSMutableArray *songQueue;
+@property (nonatomic) AVPlayer *appPlayer;
 @property (nonatomic) NSURL *soundFileURL;
 @property (nonatomic,readwrite) NSUInteger voteCount;
-@property (nonatomic,copy) MPMediaItem *nowPlayingItem;
+@property (nonatomic,copy) SongStruct *nowPlayingItem;
 @property (nonatomic) IBOutlet UILabel *nowPlayingLabel;
 @property (nonatomic) IBOutlet UILabel *artistLabel;
+@property (nonatomic) IBOutlet UILabel *minLabel;
+@property (nonatomic) IBOutlet UILabel *maxLabel;
 @property (nonatomic) IBOutlet UIButton *pausePlay;
-@property (nonatomic) IBOutlet UISlider *songProgress;
+@property (nonatomic) IBOutlet UIProgressView *songProgress;
 @property (nonatomic) NSMutableArray *myLibrary;
 @property (readwrite) BOOL playing;
 @property (readwrite) BOOL interruptedOnPlayback;
 
-
 -(IBAction)pauseOrPlayMusic :(id)sender;
-- (void) updatePlayerQueueWithMediaCollection: (MPMediaItemCollection *) mediaItemCollection;
+- (void) updatePlayerQueueWithMediaCollection: (NSArray *) mediaItemCollection;
 
 
 @end
