@@ -14,6 +14,7 @@
 #import "LeftPanelViewController.h"
 #import "SongStruct.h"
 
+
 @implementation QueueTableViewController
 
 @synthesize currentQueue;

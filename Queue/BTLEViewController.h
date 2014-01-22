@@ -29,6 +29,7 @@
 @property (nonatomic) NSMutableArray *sessions;
 @property (nonatomic) NSString *hostName;
 @property (nonatomic) NSMutableArray *hostLibrary;
+@property (nonatomic) UILabel *accountLabel;
 
 
 - (void)sendData:(NSData *)data toPeers:(NSArray *)peerIDs reliable:(BOOL)reliable error:(NSError *__autoreleasing *)error;

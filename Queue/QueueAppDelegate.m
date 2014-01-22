@@ -10,8 +10,16 @@
 #import "QueueAppDelegate.h"
 #import "LeftPanelViewController.h"
 #import "SongStruct.h"
+#import "SCUI.h"
 
 @implementation QueueAppDelegate
+
++ (void) initialize
+{
+    [SCSoundCloud setClientID:@".."
+                       secret:@"..."
+                  redirectURL:[NSURL URLWithString:@"https://soundcloud.com/connect"]];
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {

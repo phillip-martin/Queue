@@ -1,3 +1,3 @@
-platform :ios
-pod 'CocoaSoundCloudAPI', '1.0.1'
-pod 'CocoaSoundCloudUI', '1.0.5'
+platform :ios, '7.0'
+pod 'CocoaSoundCloudAPI', '1.0.2'
+pod 'CocoaSoundCloudUI', '1.0.9'

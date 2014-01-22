@@ -13,8 +13,9 @@ static NSString * const kBeaconCellIdentifier = @"Host";
 
 static NSString * const kAdvertisingOperationTitle = @"Host A PlayList";
 static NSString * const kRangingOperationTitle = @"Find A Playlist";
-static NSUInteger const kNumberOfSections = 2;
-static NSUInteger const kNumberOfAvailableOperations = 2;
+static NSString * const kSoundCloudOperationTitle = @"SoundCloud Account";
+static NSUInteger const kNumberOfSections = 3;
+static NSUInteger const kNumberOfAvailableOperations = 3;
 static CGFloat const kOperationCellHeight = 44;
 static CGFloat const kBeaconCellHeight = 52;
 static NSString * const kBeaconSectionTitle = @"Looking for playlists...";
@@ -27,6 +28,7 @@ typedef NS_ENUM(NSUInteger, NTSectionType) {
 };
 
 typedef NS_ENUM(NSUInteger, NTOperationsRow) {
+    NTSoundCloudRow,
     NTAdvertisingRow,
     NTRangingRow
 };
@@ -37,7 +39,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
 #import "QueueViewController.h"
 #import "QueueTableViewController.h"
 #import "LeftPanelViewController.h"
-
+#import "SCUI.h"
 #import "SongStruct.h"
 
 @interface BTLEViewController ()
@@ -54,7 +56,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
 @synthesize sessions;
 @synthesize advertiser;
 @synthesize hostLibrary;
-
+@synthesize accountLabel;
 
 -(void)session:(MCSession *)session peer:(MCPeerID *)peerID didChangeState:(MCSessionState)state
 {
@@ -526,6 +528,21 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
         case NTOperationsSection: {
             cell = [tableView dequeueReusableCellWithIdentifier:kOperationCellIdentifier];
             switch (indexPath.row) {
+                case NTSoundCloudRow:
+                    cell = [tableView dequeueReusableCellWithIdentifier:kOperationCellIdentifier];
+                    cell.textLabel.text = kSoundCloudOperationTitle;
+                    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                    cell.accessoryView = nil;
+                    accountLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 25.0, 230.0, 25.0)];
+                    accountLabel.font = [UIFont systemFontOfSize:20.0];
+                    accountLabel.textAlignment = NSTextAlignmentLeft;
+                    accountLabel.textColor = [UIColor blackColor];
+                    accountLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+                    [cell.contentView addSubview:accountLabel];
+                    if([SCSoundCloud account] != nil){
+                        accountLabel.text = [[SCSoundCloud account] identifier];
+                    }
+                    break;
                 case NTAdvertisingRow:
                     cell.textLabel.text = kAdvertisingOperationTitle;
                     self.advertisingSwitch = (UISwitch *)cell.accessoryView;
@@ -625,7 +642,11 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if([indexPath section] > 0){
+    if ([indexPath section] == NTOperationsSection && [indexPath row] == NTSoundCloudRow) {
+        [self login];
+    }
+    
+    else if([indexPath section] > 0){
         connectedPeer = [foundPeers objectAtIndex:[indexPath row]];
         [browser invitePeer:connectedPeer toSession:currSession withContext:nil timeout:0];
         [self centralDidConnect];
@@ -635,6 +656,30 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     
 }
 
+
+//soundcloud login VC
+- (void) login
+{
+    SCLoginViewControllerCompletionHandler handler = ^(NSError *error) {
+        if (SC_CANCELED(error)) {
+            NSLog(@"Canceled!");
+        } else if (error) {
+            NSLog(@"Error: %@", [error localizedDescription]);
+        } else {
+            NSLog(@"Done!");
+            accountLabel.text = [[SCSoundCloud account] identifier];
+        }
+    };
+        
+    [SCSoundCloud requestAccessWithPreparedAuthorizationURLHandler:^(NSURL *preparedURL) {
+        SCLoginViewController *loginViewController;
+            
+        loginViewController = [SCLoginViewController
+                                loginViewControllerWithPreparedURL:preparedURL
+                                completionHandler:handler];
+        [self presentModalViewController:loginViewController animated:YES];
+    }];
+}
 
 
 @end
