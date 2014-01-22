@@ -371,12 +371,14 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
             NSString *documentsDirectory = [paths objectAtIndex:0];
             //first loops adds songs with url to our library
             for (id item in newPlaylist) {
+                NSLog(@"%u",[newPlaylist count]);
                 if([item isKindOfClass:[SongStruct class]]){//dont want to add the message object
                     NSString *tempID = [NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]];
                     if([queueTable.addedSongs objectForKey:tempID] == nil){
                         NSString *appFile = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]]];
                         [[item buffer] writeToFile:appFile atomically: YES];
                         NSURL *filepath = [NSURL fileURLWithPath:appFile];
+                        NSLog(@"%@",filepath);
                         [item setBuffer:nil];
                         [item setMediaURL:filepath];
                         

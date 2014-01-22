@@ -72,8 +72,6 @@
     //AVAudioSessionPortDescription *input = [[session.currentRoute.inputs count]?session.currentRoute.inputs:nil objectAtIndex:0];
 }
 
-
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -277,7 +275,6 @@
 	if (mediaItemCollection) {
 
         [songQueue addObjectsFromArray:mediaItemCollection];
-        NSLog(@"%u",[songQueue count]);
         //if not playing
         if(appPlayer.currentItem == nil){
             [self nextSong];
