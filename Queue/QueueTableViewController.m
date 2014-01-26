@@ -86,24 +86,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    /*NSFileManager* manager = [NSFileManager defaultManager];
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentPath = [paths objectAtIndex:0];
-    NSString *path;
-    NSError *error;
-    if ((path = [documentPath stringByAppendingPathComponent:@"CurrentPlaylist.plist"]))
-    {
-        //if file exists, delete it and create new one
-        if ([manager fileExistsAtPath:path] == YES) {
-            [manager removeItemAtPath:path error:&error];
-        }
-        
-        resourcePath = [[NSBundle mainBundle] pathForResource:@"CurrentPlaylist" ofType:@"plist"];
-        [manager copyItemAtPath:resourcePath toPath:path error:&error];
-        NSLog(@"loaded current playlist plist");
-        
-    }*/
 
 }
 
@@ -128,7 +110,7 @@
         NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyTitle],@"title")];
         NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyArtist],@"artist")];
         //note: Do not need buffer, url or album artwork for queue table. It is simply a list
-        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 bufferData:nil songURL:nil albumArtwork:nil];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 songURL:nil];
         NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
         if([self.addedSongs objectForKey:tempID] == nil){
             [self.addedSongs setObject:newSong forKey:tempID];
@@ -143,7 +125,7 @@
         //get relevant data from songs and add them to the queue
         NSMutableArray *songData = [[NSMutableArray alloc] init];
         for(MPMediaItem *item in mediaItemCollection.items){
-            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:nil songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+            SongStruct *newSong = [[[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL]] artwork:[item valueForProperty:MP];
             NSLog(@"%@",[newSong mediaURL]);
             NSLog(@"%@",[item valueForProperty:MPMediaItemPropertyTitle]);
             //we added the song to our addedSongs dictionary already, so the votecount should be 1
@@ -162,46 +144,6 @@
         //update playlist tables of all connected peers. They dont need the media data
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.songArray];
         [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
-    }
-    else{
-        //convert MPMediaItem to NSData. This will be sent to the host. The song is played once then destroyed
-        NSMutableArray *songData = [[NSMutableArray alloc] init];
-        [songData addObject:@"song buffer"]; //message
-        for(MPMediaItem *item in mediaItemCollection.items){
-            NSMutableData *data = [[NSMutableData alloc] init];
-            
-            NSURL *url = [item valueForProperty:MPMediaItemPropertyAssetURL];
-            AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-            AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:asset error:nil];
-            const uint32_t sampleRate = 16000; // 16k sample/sec
-            const uint16_t channels = 2; // 2 channel/sample (stereo)
-            NSDictionary *settings = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
-                                      [NSNumber numberWithFloat:(float)sampleRate], AVSampleRateKey,
-                                      [NSNumber numberWithFloat:(float)channels], AVNumberOfChannelsKey, nil];
-            AVAssetReaderTrackOutput *assetOutput = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:asset.tracks[0] outputSettings:settings];
-            [assetReader addOutput:assetOutput];
-            [assetReader startReading];
-            // read the samples from the asset and append them subsequently
-            while ([assetReader status] != AVAssetReaderStatusCompleted) {
-                CMSampleBufferRef sampleBuffer = [assetOutput copyNextSampleBuffer];
-                if (sampleBuffer == NULL) continue;
-                CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-                size_t size = CMBlockBufferGetDataLength(blockBuffer);
-                uint8_t *outBytes = malloc(size);
-                CMBlockBufferCopyDataBytes(blockBuffer, 0, size, outBytes);
-                CMSampleBufferInvalidate(sampleBuffer);
-                CFRelease(sampleBuffer);
-                [data appendBytes:outBytes length:size];
-            }
-            //add data to array with message as first object. This is so the devices know how to parse the data
-
-            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:data songURL:nil albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
-            [songData addObject:newSong];
-        }
-        NSData *labeledData = [NSKeyedArchiver archivedDataWithRootObject:songData];
-        [btController sendData:labeledData toPeers:[NSArray arrayWithObject:btController.connectedPeer] reliable:YES error:nil];
-        
     }
 }
 
@@ -286,47 +228,6 @@
     
 	[tableView deselectRowAtIndexPath: indexPath animated: YES];
 }
-
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
-}
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
 
 #pragma mark - Navigation
 

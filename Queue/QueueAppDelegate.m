@@ -16,9 +16,9 @@
 
 + (void) initialize
 {
-    [SCSoundCloud setClientID:@".."
-                       secret:@"..."
-                  redirectURL:[NSURL URLWithString:@"https://soundcloud.com/connect"]];
+    [SCSoundCloud setClientID:@""
+                       secret:@""
+                  redirectURL:[NSURL URLWithString:@""]];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -39,18 +39,6 @@
     [leftPanel setQTVC:[storyboard instantiateViewControllerWithIdentifier:@"centerViewController"]];
     
 	self.viewController.centerPanel = [[UINavigationController alloc] initWithRootViewController:[leftPanel QTVC]];
-	
-    /*[[UINavigationBar appearance] setTitleTextAttributes:
-     [NSDictionary dictionaryWithObjectsAndKeys:
-      [UIColor colorWithRed:255.0/255.0 green:255.0/255.0 blue:255.0/255.0 alpha:1.0],
-      NSForegroundColorAttributeName,
-      [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8],
-      NSShadowAttributeName,
-      [NSValue valueWithUIOffset:UIOffsetMake(0, -1)],
-      NSShadowAttributeName,
-      [UIFont fontWithName:@"Arial-Bold" size:0.0],
-      NSFontAttributeName,
-      nil]];*/
     
 	self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
@@ -78,6 +66,19 @@
     }
     NSLog(@"%lul songs loaded from library",(unsigned long)[[[leftPanel QVC] myLibrary] count]);
     
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    if (!url) {  return NO; }
+    
+    //always go to queue table
+    if(self.viewController.centerPanel == nil) {return NO; }
+    
+    [self.viewController setCenterPanel:[(LeftPanelViewController *)self.viewController.leftPanel QTVC]];
+    
+    //save account here
     return YES;
 }
 

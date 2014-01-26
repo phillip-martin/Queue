@@ -353,7 +353,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     NSLog(@"received data from %@",peerID.displayName);
     NSMutableArray *newPlaylist = [NSKeyedUnarchiver unarchiveObjectWithData:data];
     if([newPlaylist isKindOfClass:[NSMutableArray class]]){
-        //if we are a client, the first song is a message from the host
+        //the first song is a message from the host for parsing
         NSString *message = [newPlaylist objectAtIndex:0];
         //remove message
         [newPlaylist removeObjectAtIndex:0];
@@ -366,60 +366,6 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                 }
             }
         }
-        else if ([message isEqual:@"song buffer"]){ //should only receive this if host
-            //received a song buffer.
-            NSLog(@"buffer");
-            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-            NSString *documentsDirectory = [paths objectAtIndex:0];
-            //first loops adds songs with url to our library
-            for (id item in newPlaylist) {
-                NSLog(@"%u",[newPlaylist count]);
-                if([item isKindOfClass:[SongStruct class]]){//dont want to add the message object
-                    NSString *tempID = [NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]];
-                    if([queueTable.addedSongs objectForKey:tempID] == nil){
-                        NSString *appFile = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]]];
-                        [[item buffer] writeToFile:appFile atomically: YES];
-                        NSURL *filepath = [NSURL fileURLWithPath:appFile];
-                        NSLog(@"%@",filepath);
-                        [item setBuffer:nil];
-                        [item setMediaURL:filepath];
-                        
-                    }
-                }
-            }
-            [mainView updatePlayerQueueWithMediaCollection: newPlaylist];
-            
-            //second loops adds them to our queue table
-            NSMutableArray *noDataSongs = [[NSMutableArray alloc] init];
-            for (id item in newPlaylist) {
-                if([item isKindOfClass:[SongStruct class]]){//dont want to add the message object
-                    NSString *tempID = [NSString stringWithFormat:@"%@",[(SongStruct *)item strIdentifier]];
-                    if([queueTable.addedSongs objectForKey:tempID] == nil){
-                        [item setArtwork:nil];
-                        [item setBuffer:nil];
-                        [item setMediaURL:nil];
-                        
-                    }
-                    else{
-                        [item Vote];
-                    }
-                    [noDataSongs addObject:item];
-                }
-            }
-            NSData *newData = [NSKeyedArchiver archivedDataWithRootObject:noDataSongs];
-            for(MCSession *tempSession in sessions){
-                //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
-                NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
-                for(MCPeerID *peer in tempSession.connectedPeers){
-                    if(peer != peerID){
-                        [idsToSend addObject:peer];
-                    }
-                }
-                [self sendData:newData toPeers:idsToSend reliable:YES error:nil];
-            }
-
-        }
-        //if it doesnt have the itunes message, then it was playlist data
         else{
             //handling of adding songs should be the same on QTVC for both server and client
             for (SongStruct *item in newPlaylist) {
@@ -446,10 +392,9 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                         NSMutableArray *hostSongs = [[NSMutableArray alloc] init];
                         for(MPMediaItem *item in collection.items){
                             //host songstruct includes url/buffer. Client songs do not
-                            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:nil songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+                            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL]];
                             [hostSongs addObject:tempSong];
                             
-                           
                         }
                         [mainView updatePlayerQueueWithMediaCollection: hostSongs];
                         
@@ -485,13 +430,13 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     
     }
     else{
-        //we recieved an MPMediaCollection
+        //we recieved a song with streams from soundcloud
         //if we're host, add it to our queue
         if(self.advertisingSwitch.on)
-            [mainView updatePlayerQueueWithMediaCollection:newPlaylist];
+        
         
         for(MPMediaItem *item in [(MPMediaItemCollection *)newPlaylist items]){
-            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 bufferData:Nil songURL:(NSURL *)MPMediaItemPropertyAssetURL albumArtwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:(NSURL *)MPMediaItemPropertyAssetURL];
             
             NSString *tempID = [NSString stringWithFormat:@"%@",tempSong.strIdentifier];
             if([queueTable.addedSongs objectForKey:tempID] == nil){
@@ -531,6 +476,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                 case NTSoundCloudRow:
                     cell = [tableView dequeueReusableCellWithIdentifier:kOperationCellIdentifier];
                     cell.textLabel.text = kSoundCloudOperationTitle;
+                    
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     cell.accessoryView = nil;
                     accountLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 25.0, 230.0, 25.0)];

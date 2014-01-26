@@ -15,11 +15,10 @@
 @property (nonatomic) NSString *title;
 @property (nonatomic) NSUInteger votes;
 @property (nonatomic) NSString *strIdentifier;
-@property (nonatomic) NSData *buffer;
-@property (nonatomic) UIImage *artwork;
 @property (nonatomic) NSURL *mediaURL;
+@property (nonatomic) NSURL *artworkURL;
 
--(id)initWithTitle:(NSString *)strTitle artist:(NSString *)strArtist voteCount:(NSInteger) count bufferData:(NSData *)data songURL:(NSURL *)url albumArtwork:(UIImage *)image;
+-(id)initWithTitle:(NSString *)strTitle artist:(NSString *)strArtist voteCount:(NSInteger) count songURL:(NSURL *)url artwork:(NSURL *)artURL;
 -(NSString *)identifier;
 -(void) Vote;
 
