@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SCYouViewController : UITableViewController <UITableViewDelegate, UITableViewDataSource>
+@interface SCYouViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic) IBOutlet UIImageView *profilePicture;
 @property (nonatomic) IBOutlet UILabel *profileName;
