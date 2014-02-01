@@ -9,11 +9,10 @@
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import "LibraryViewController.h"
-#import "QueueTableViewController.h"
-#import "BTLEViewController.h"
+#import "LeftPanelViewController.h"
 #import "SCUI.h"
 
-@interface MediaSourceViewController : UIViewController <LibraryViewControllerDelegate, MPMediaPickerControllerDelegate, QueueTableDelegate>
+@interface MediaSourceViewController : UIViewController <LibraryViewControllerDelegate, MPMediaPickerControllerDelegate>
 
 @property (nonatomic) IBOutlet UIButton *soundCloudButton;
 @property (nonatomic) IBOutlet UIButton *hostLibraryButton;
@@ -21,7 +20,9 @@
 
 @property (nonatomic) SCAccount *account; //soundcloud account
 
+@property (nonatomic) LeftPanelViewController *leftController;
 @property (nonatomic) BTLEViewController *btController;
+@property (nonatomic) QueueTableViewController *queueTableController;
 
 -(IBAction)addLibrarySong;
 -(IBAction)addSoundCloud;

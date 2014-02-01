@@ -8,7 +8,6 @@
 
 #import "MediaSourceViewController.h"
 
-#import "LeftPanelViewController.h"
 
 @interface MediaSourceViewController ()
 
@@ -18,7 +17,9 @@
 @synthesize soundCloudButton;
 @synthesize hostLibraryButton;
 @synthesize account;
+@synthesize leftController;
 @synthesize btController;
+@synthesize queueTableController;
 
 -(IBAction)addLibrarySong{
     
@@ -63,8 +64,8 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    
-    
+    btController = [leftController BTLE];
+    queueTableController = [leftController QTVC];
 }
 
 - (void)didReceiveMemoryWarning
@@ -81,7 +82,8 @@
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:songs];
         [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:btController.connectedPeer, nil] reliable:YES error:nil];
         for(SongStruct *tempSong in songs){
-            ;
+            //QueueTable delegate method
+            [queueTableController addSong:tempSong];
         }
         
     }
@@ -106,14 +108,8 @@
         NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyArtist],@"artist")];
         //note: Do not need buffer, url or album artwork for queue table. It is simply a list
         SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 songURL:nil artwork:nil];
-        NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
-        if([self.addedSongs objectForKey:tempID] == nil){
-            [self.addedSongs setObject:newSong forKey:tempID];
-        }
-        else{
-            SongStruct *temp = [self.addedSongs objectForKey:tempID];
-            [temp Vote];
-        }
+        [queueTableController addSong:newSong];
+        
     }
     if(!btController.rangingSwitch.on){
         //get relevant data from songs and add them to the queue
@@ -122,12 +118,8 @@
             SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
             NSLog(@"%@",[newSong mediaURL]);
             NSLog(@"%@",[item valueForProperty:MPMediaItemPropertyTitle]);
-            //we added the song to our addedSongs dictionary already, so the votecount should be 1
-            if([[self.addedSongs objectForKey:newSong.strIdentifier] votes] == 1){
-                NSLog(@"here");
-                [songData addObject:newSong];
-                
-            }
+            //add song to queue table
+            [queueTableController addSong:newSong];
             
         }
         
@@ -136,7 +128,7 @@
         //add picked songs to our media queue
         [mainView updatePlayerQueueWithMediaCollection: songData];
         //update playlist tables of all connected peers. They dont need the media data
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.songArray];
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:queueTableController.songArray];
         [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
     }
 }

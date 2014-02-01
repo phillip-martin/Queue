@@ -12,6 +12,7 @@
 #import "BTLEViewController.h"
 #import "QueueViewController.h"
 #import "LeftPanelViewController.h"
+#import "MediaSourceViewController.h"
 
 
 @implementation QueueTableViewController
@@ -64,11 +65,21 @@
     return [self.addedSongs count];
 }
 
+-(void)refreshTable{
+    [self.currentQueue reloadData];
+}
+
 //update our table view with added/edited songs
 -(void)addSong:(SongStruct *)song{
-    [self.addedSongs setObject:song forKey:song.strIdentifier];
+    if([self.addedSongs objectForKey:song.identifier] == nil){
+        [self.addedSongs setObject:song forKey:song.identifier];
+    }
+    else{
+        SongStruct *temp = [self.addedSongs objectForKey:song.identifier];
+        [temp Vote];
+    }
     self.songArray = [self.addedSongs allValues];
-	[self.currentQueue reloadData];
+	[self refreshTable];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -140,13 +151,12 @@
 {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
-    if([[segue identifier] isEqual:@"LibraryViewSegue"]){
+    if([[segue identifier] isEqual:@"PickerSegue"]){
         UINavigationController *nav = segue.destinationViewController;
-        LibraryViewController *LVC = nav.viewControllers[0];
-        [LVC setLibraryDelegate:self];
+        MediaSourceViewController *MSVC = nav.viewControllers[0];
         LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
-        BTLEViewController *tempView= [leftController BTLE];
-        [LVC setLibraryData:[tempView hostLibrary]];
+        [MSVC setLeftController:leftController];
+        
     }
 }
 

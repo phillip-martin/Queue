@@ -10,28 +10,23 @@
 #import "LibraryViewController.h"
 #import "SongStruct.h"
 
-@protocol QueueTableDelegate;
-
-@interface QueueTableViewController : UITableViewController < MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource, LibraryViewControllerDelegate>
+@interface QueueTableViewController : UITableViewController < MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource>
 {
     IBOutlet UITableView *currentQueue;
     IBOutlet UIBarButtonItem *addMusicButton;
     NSString *resourcePath;
 }
 
-@property (nonatomic, assign) id<QueueTableDelegate> delegate;
 @property (nonatomic) UITableView *currentQueue;
 @property (nonatomic) NSMutableDictionary *addedSongs;
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 @property (nonatomic) NSArray *songArray;
 
-@end
-
-@protocol QueueTableDelegate <NSObject>
-
+-(void)refreshTable;
 -(void)addSong:(SongStruct *)song;
 
 @end
+
 
 
 

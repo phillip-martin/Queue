@@ -165,7 +165,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
     QueueTableViewController *queueTable = [leftController QTVC];
     [queueTable.addedSongs removeAllObjects];
-    [queueTable addedSong];
+    [queueTable refreshTable];
     [self.tableView reloadData];
 }
 
@@ -259,7 +259,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
         QueueTableViewController *queueTable = [leftController QTVC];
         //if we have data in our table, remove it
         [queueTable.addedSongs removeAllObjects];
-        [queueTable addedSong];
+        [queueTable refreshTable];
         currSession = [self availableSession];
         self.statusLabel.text = @"Connect to a playlist";
         [browser startBrowsingForPeers];
@@ -371,96 +371,47 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
             for (SongStruct *item in newPlaylist) {
                 //if we dont have have the song, query for it in our library, then add it
                 NSString *tempID = [NSString stringWithFormat:@"%@",item.strIdentifier];
-                if([queueTable.addedSongs objectForKey:tempID] == nil){
+                if(self.advertisingSwitch.on){//if we're hosting the playlist
+                    MPMediaPropertyPredicate *artistNamePredicate =
+                    [MPMediaPropertyPredicate predicateWithValue: item.artist
+                                                     forProperty: MPMediaItemPropertyArtist
+                                                  comparisonType:MPMediaPredicateComparisonEqualTo];
+                    NSLog(@"%@",item.artist);
+                    MPMediaPropertyPredicate *albumNamePredicate =
+                    [MPMediaPropertyPredicate predicateWithValue: item.title
+                                                     forProperty: MPMediaItemPropertyTitle
+                                                  comparisonType:MPMediaPredicateComparisonEqualTo];
+                    NSLog(@"%@",item.title);
+                    MPMediaQuery *myComplexQuery = [[MPMediaQuery alloc] init];
                     
-                    if(self.advertisingSwitch.on){//if we're hosting the playlist
-                        MPMediaPropertyPredicate *artistNamePredicate =
-                        [MPMediaPropertyPredicate predicateWithValue: item.artist
-                                                         forProperty: MPMediaItemPropertyArtist
-                                                      comparisonType:MPMediaPredicateComparisonEqualTo];
-                        NSLog(@"%@",item.artist);
-                        MPMediaPropertyPredicate *albumNamePredicate =
-                        [MPMediaPropertyPredicate predicateWithValue: item.title
-                                                         forProperty: MPMediaItemPropertyTitle
-                                                      comparisonType:MPMediaPredicateComparisonEqualTo];
-                        NSLog(@"%@",item.title);
-                        MPMediaQuery *myComplexQuery = [[MPMediaQuery alloc] init];
+                    [myComplexQuery addFilterPredicate: artistNamePredicate];
+                    [myComplexQuery addFilterPredicate: albumNamePredicate];
+                    MPMediaItemCollection *collection = [[MPMediaItemCollection alloc] initWithItems:[myComplexQuery items]];
+                    NSMutableArray *hostSongs = [[NSMutableArray alloc] init];
+                    for(MPMediaItem *item in collection.items){
+                        //host songstruct includes url/buffer. Client songs do not
+                        SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+                        [hostSongs addObject:tempSong];
                         
-                        [myComplexQuery addFilterPredicate: artistNamePredicate];
-                        [myComplexQuery addFilterPredicate: albumNamePredicate];
-                        MPMediaItemCollection *collection = [[MPMediaItemCollection alloc] initWithItems:[myComplexQuery items]];
-                        NSMutableArray *hostSongs = [[NSMutableArray alloc] init];
-                        for(MPMediaItem *item in collection.items){
-                            //host songstruct includes url/buffer. Client songs do not
-                            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
-                            [hostSongs addObject:tempSong];
-                            
-                        }
-                        [mainView updatePlayerQueueWithMediaCollection: hostSongs];
-                        
-                        for(MCSession *tempSession in sessions){
-                            //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
-                            NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
-                            for(MCPeerID *peer in tempSession.connectedPeers){
-                                if(peer != peerID){
-                                    [idsToSend addObject:peer];
-                                }
+                    }
+                    [mainView updatePlayerQueueWithMediaCollection: hostSongs];
+                    
+                    for(MCSession *tempSession in sessions){
+                        //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
+                        NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
+                        for(MCPeerID *peer in tempSession.connectedPeers){
+                            if(peer != peerID){
+                                [idsToSend addObject:peer];
                             }
-                            [self sendData:data toPeers:idsToSend reliable:YES error:nil];
                         }
+                        [self sendData:data toPeers:idsToSend reliable:YES error:nil];
                     }
 
-                    else{
-                            
-                    }
-                    
-                    NSLog(@"Adding song %@ to queueTable",tempID);
-                    [queueTable.addedSongs setObject:item forKey:tempID];
-                    [queueTable addedSong];
-                    
                 }
-                else{
-                    //if we have it qeued already, increment vote count
-                    SongStruct *temp = [queueTable.addedSongs objectForKey:tempID];
-                    [temp Vote];
-                }
-                
+                [queueTable addSong:item];
             }
         }
     
-    }
-    else{
-        //we recieved a song with streams from soundcloud
-        //if we're host, add it to our queue
-        if(self.advertisingSwitch.on)
-        
-        
-        for(MPMediaItem *item in [(MPMediaItemCollection *)newPlaylist items]){
-            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
-            
-            NSString *tempID = [NSString stringWithFormat:@"%@",tempSong.strIdentifier];
-            if([queueTable.addedSongs objectForKey:tempID] == nil){
-                NSLog(@"Adding song %@ to queueTable",tempID);
-                [queueTable.addedSongs setObject:item forKey:tempID];
-                [queueTable addedSong];
-            }
-            else{
-                //if we have it qeued already, increment vote count
-                SongStruct *temp = [queueTable.addedSongs objectForKey:tempID];
-                [temp Vote];
-            }
-        }
-
-        for(MCSession *tempSession in sessions){
-            //dont resend the data to the peer who sent us the updated playlist or it may cause an infinite loop
-            NSMutableArray *idsToSend = [[NSMutableArray alloc] init];
-            for(MCPeerID *peer in tempSession.connectedPeers){
-                if(peer != peerID){
-                    [idsToSend addObject:peer];
-                }
-            }
-            [self sendData:data toPeers:idsToSend reliable:YES error:nil];
-        }
     }
     
 }
