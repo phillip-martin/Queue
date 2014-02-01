@@ -17,5 +17,6 @@
 @property (nonatomic) JASidePanelController *viewController;
 
 
+
 @end
 

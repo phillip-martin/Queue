@@ -18,7 +18,7 @@
 {
     [SCSoundCloud setClientID:@""
                        secret:@""
-                  redirectURL:[NSURL URLWithString:@""]];
+                  redirectURL:[NSURL URLWithString:@"queue://oauth"]];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -60,7 +60,7 @@
     for (MPMediaItem *song in itemsFromGenericQuery) {
         NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyTitle],@"title")];
         NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([song valueForProperty:MPMediaItemPropertyArtist],@"artist")];
-        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0 bufferData:nil songURL:(NSURL *)[song valueForProperty:MPMediaItemPropertyAssetURL] albumArtwork:[song valueForProperty:MPMediaItemPropertyArtwork]];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:0 songURL:(NSURL *)[song valueForProperty:MPMediaItemPropertyAssetURL] artwork:[song valueForProperty:MPMediaItemPropertyArtwork]];
         [[[leftPanel QVC] myLibrary] addObject:newSong];
         NSLog (@"%@", tempTitle);
     }
@@ -71,12 +71,12 @@
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
+    NSLog(@"here");
     if (!url) {  return NO; }
     
     //always go to queue table
     if(self.viewController.centerPanel == nil) {return NO; }
     
-    [self.viewController setCenterPanel:[(LeftPanelViewController *)self.viewController.leftPanel QTVC]];
     
     //save account here
     return YES;

@@ -14,7 +14,7 @@ static NSString * const kBeaconCellIdentifier = @"Host";
 static NSString * const kAdvertisingOperationTitle = @"Host A PlayList";
 static NSString * const kRangingOperationTitle = @"Find A Playlist";
 static NSString * const kSoundCloudOperationTitle = @"SoundCloud Account";
-static NSUInteger const kNumberOfSections = 3;
+static NSUInteger const kNumberOfSections = 2;
 static NSUInteger const kNumberOfAvailableOperations = 3;
 static CGFloat const kOperationCellHeight = 44;
 static CGFloat const kBeaconCellHeight = 52;
@@ -392,7 +392,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                         NSMutableArray *hostSongs = [[NSMutableArray alloc] init];
                         for(MPMediaItem *item in collection.items){
                             //host songstruct includes url/buffer. Client songs do not
-                            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL]];
+                            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
                             [hostSongs addObject:tempSong];
                             
                         }
@@ -436,7 +436,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
         
         
         for(MPMediaItem *item in [(MPMediaItemCollection *)newPlaylist items]){
-            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:(NSURL *)MPMediaItemPropertyAssetURL];
+            SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
             
             NSString *tempID = [NSString stringWithFormat:@"%@",tempSong.strIdentifier];
             if([queueTable.addedSongs objectForKey:tempID] == nil){
@@ -601,7 +601,6 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
     }
     
 }
-
 
 //soundcloud login VC
 - (void) login

@@ -56,7 +56,7 @@
     [SCRequest performMethod:SCRequestMethodGET
                   onResource:[NSURL URLWithString:resourceURL]
              usingParameters:nil
-                 withAccount:account
+                 withAccount:nil //account
       sendingProgressHandler:nil
              responseHandler:handler];
 }

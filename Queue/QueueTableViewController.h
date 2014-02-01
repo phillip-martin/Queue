@@ -8,22 +8,28 @@
 
 #import <MediaPlayer/MediaPlayer.h>
 #import "LibraryViewController.h"
+#import "SongStruct.h"
+
+@protocol QueueTableDelegate;
 
 @interface QueueTableViewController : UITableViewController < MPMediaPickerControllerDelegate, UITableViewDelegate, UITabBarDelegate, UITableViewDataSource, LibraryViewControllerDelegate>
 {
     IBOutlet UITableView *currentQueue;
-    //IBOutlet UIBarButtonItem *songInfo; Do we want this? for voting?
     IBOutlet UIBarButtonItem *addMusicButton;
     NSString *resourcePath;
 }
 
+@property (nonatomic, assign) id<QueueTableDelegate> delegate;
 @property (nonatomic) UITableView *currentQueue;
 @property (nonatomic) NSMutableDictionary *addedSongs;
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 @property (nonatomic) NSArray *songArray;
 
--(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSArray *)songs;
--(void)addedSong;
+@end
+
+@protocol QueueTableDelegate <NSObject>
+
+-(void)addSong:(SongStruct *)song;
 
 @end
 

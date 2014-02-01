@@ -243,7 +243,6 @@
         
         // Get the artwork from the current media item, if it has artwork.
         UIImage *artwork = [nowPlayingItem artwork];
-        [UIImage imageWithData:<#(NSData *)#>
         // Obtain a UIImage object from the MPMediaItemArtwork object
         if (artwork) {
             artworkItem.image = [self resizeimage:artwork toSize:CGSizeMake (280, 280)];

@@ -101,7 +101,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3089" y="-789"/>
+            <point key="canvasLocation" x="3045" y="-789"/>
         </scene>
         <!--Library View Controller - reQuest-->
         <scene sceneID="sge-KK-mNH">
@@ -152,7 +152,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DEx-5W-TGu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4464" y="-575"/>
+            <point key="canvasLocation" x="6416" y="-567"/>
         </scene>
         <!--Queue Table View Controller - reQuest-->
         <scene sceneID="dS5-B7-Snk">
@@ -186,13 +186,13 @@
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="Ovj-u4-M9N">
                             <connections>
                                 <action selector="addHandler" destination="MZl-in-hoo" id="hRX-b0-qRr"/>
+                                <segue destination="dE7-ta-Pu4" kind="push" identifier="PickerSegue" id="t5y-2s-9Z5"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="addMusicButton" destination="Ovj-u4-M9N" id="eVl-sp-K3z"/>
                         <outlet property="currentQueue" destination="gJ4-pU-xcd" id="cM7-fg-FD5"/>
-                        <segue destination="ocB-ip-b8Y" kind="modal" identifier="LibraryViewSegue" id="876-d4-FzM"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cON-Gl-T5m" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -396,6 +396,7 @@
             <objects>
                 <navigationController storyboardIdentifier="LibraryNavController" automaticallyAdjustsScrollViewInsets="NO" id="ocB-ip-b8Y" sceneMemberID="viewController">
                     <toolbarItems/>
+                    <navigationItem key="navigationItem" id="eje-5D-oaj"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="fFW-jS-4qN">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -407,12 +408,12 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ulC-5Q-3Zg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3938" y="-575"/>
+            <point key="canvasLocation" x="5610" y="-567"/>
         </scene>
-        <!--View Controller - Add Song From...-->
+        <!--Media Source View Controller - Add Song From...-->
         <scene sceneID="wXe-kY-1J4">
             <objects>
-                <viewController id="vaG-hK-drA" sceneMemberID="viewController">
+                <viewController id="vaG-hK-drA" customClass="MediaSourceViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="9c7-aC-WCr"/>
                         <viewControllerLayoutGuide type="bottom" id="XKf-Fk-85A"/>
@@ -427,6 +428,10 @@
                                 <state key="normal" title="Host's Library">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="addLibrarySong" destination="vaG-hK-drA" eventType="touchUpInside" id="V1n-vl-9Bm"/>
+                                    <segue destination="ocB-ip-b8Y" kind="push" identifier="LibrarySegue" id="3ac-dp-Pt3"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S8R-h0-DMD">
                                 <rect key="frame" x="101" y="378" width="119" height="30"/>
@@ -434,15 +439,23 @@
                                 <state key="normal" title="SoundCloud">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="addSoundCloud" destination="vaG-hK-drA" eventType="touchUpInside" id="JTD-v4-ccf"/>
+                                    <segue destination="ykR-U6-Igl" kind="push" identifier="SCSegue" id="Rtg-9l-EtD"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" title="Add Song From..." id="3Cg-NX-w9X"/>
+                    <connections>
+                        <outlet property="hostLibraryButton" destination="8bJ-kg-FqN" id="kAG-V1-We4"/>
+                        <outlet property="soundCloudButton" destination="S8R-h0-DMD" id="pFg-QR-uX9"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dYB-gH-0hv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4470" y="1082"/>
+            <point key="canvasLocation" x="4506" y="245"/>
         </scene>
         <!--You View Controller - You-->
         <scene sceneID="XjM-vz-sRW">
@@ -535,13 +548,14 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KVY-9O-9nf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4196" y="2234"/>
+            <point key="canvasLocation" x="6876" y="825"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="KAY-HX-vSw">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="dE7-ta-Pu4" sceneMemberID="viewController">
                     <toolbarItems/>
+                    <navigationItem key="navigationItem" id="Kjj-44-GEL"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="8Ro-f1-cAx">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -553,7 +567,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0Ex-jm-Obu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3928" y="1082"/>
+            <point key="canvasLocation" x="3856" y="245"/>
         </scene>
         <!--Navigation Controller - You-->
         <scene sceneID="l3B-II-ltD">
@@ -572,7 +586,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JWX-p4-qx7" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3462" y="2234"/>
+            <point key="canvasLocation" x="6117" y="825"/>
         </scene>
         <!--Search View Controller - Search-->
         <scene sceneID="hEi-2D-aCf">
@@ -643,7 +657,7 @@
                     </connections>
                 </searchDisplayController>
             </objects>
-            <point key="canvasLocation" x="4203" y="2982"/>
+            <point key="canvasLocation" x="6876" y="1613"/>
         </scene>
         <!--Navigation Controller - Search-->
         <scene sceneID="5VT-nK-u7u">
@@ -662,13 +676,14 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Sdx-bB-njX" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3461" y="2982"/>
+            <point key="canvasLocation" x="6117" y="1613"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="gJV-eK-OlP">
             <objects>
                 <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="ykR-U6-Igl" sceneMemberID="viewController">
                     <toolbarItems/>
+                    <navigationItem key="navigationItem" id="u9l-dr-aZm"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" translucent="NO" id="Kq2-HK-u2C">
                         <autoresizingMask key="autoresizingMask"/>
@@ -681,7 +696,7 @@
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Bys-IV-4PF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2935" y="2608"/>
+            <point key="canvasLocation" x="5385" y="1219"/>
         </scene>
     </scenes>
     <resources>

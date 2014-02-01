@@ -16,9 +16,9 @@
 @property (nonatomic) NSUInteger votes;
 @property (nonatomic) NSString *strIdentifier;
 @property (nonatomic) NSURL *mediaURL;
-@property (nonatomic) NSURL *artworkURL;
+@property (nonatomic) UIImage *artwork;
 
--(id)initWithTitle:(NSString *)strTitle artist:(NSString *)strArtist voteCount:(NSInteger) count songURL:(NSURL *)url artwork:(NSURL *)artURL;
+-(id)initWithTitle:(NSString *)strTitle artist:(NSString *)strArtist voteCount:(NSInteger) count songURL:(NSURL *)url artwork:(UIImage *)art;
 -(NSString *)identifier;
 -(void) Vote;
 

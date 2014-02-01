@@ -12,7 +12,6 @@
 #import "BTLEViewController.h"
 #import "QueueViewController.h"
 #import "LeftPanelViewController.h"
-#import "SongStruct.h"
 
 
 @implementation QueueTableViewController
@@ -23,44 +22,7 @@
 
 - (IBAction) addHandler {
     
-    MPMediaPickerController *mediaPicker =
-    [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
-	
-    mediaPicker.delegate = self;
-    mediaPicker.allowsPickingMultipleItems = YES;
-    mediaPicker.prompt = NSLocalizedString (@"Add a song to the queue", @"Choose a song to add to the queue");
-
-    
-    if ([self respondsToSelector:@selector(presentViewController:animated:completion:)]){
-        [self presentViewController:mediaPicker animated:YES completion:nil];
-    } else {
-        [self presentModalViewController:mediaPicker animated:YES];
-    }
-    
-    /*else{
-        [self performSegueWithIdentifier:@"LibraryViewSegue" sender:self];
-        
-    }*/
-}
-
--(void)libraryViewController:(LibraryViewController *)libraryViewController didChooseSongs:(NSMutableArray *)songs
-{
-    if([songs count] > 0){
-        
-        LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
-        BTLEViewController *tempView = [leftController BTLE];
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:songs];
-        [tempView sendData:data toPeers:[[NSArray alloc] initWithObjects:tempView.connectedPeer, nil] reliable:YES error:nil];
-        for(SongStruct *tempSong in songs){
-            [self.addedSongs setObject:tempSong forKey:tempSong.strIdentifier];
-        }
-        [self addedSong];
-    }
-    if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
-        [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
-    } else {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
+    [self performSegueWithIdentifier:@"PickerSegue" sender:self];
 }
 
 //vote button for song
@@ -95,65 +57,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-// Responds to the user tapping Done after choosing music.
-- (void) mediaPicker: (MPMediaPickerController *) mediaPicker didPickMediaItems: (MPMediaItemCollection *) mediaItemCollection {
-    //dismiss picker
-	if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
-        [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
-    } else {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
-    LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
-    BTLEViewController *btController = [leftController BTLE];
-    //add the songs to our queue table view
-    for (int i = 0; i<mediaItemCollection.items.count; i++) {
-        NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyTitle],@"title")];
-        NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyArtist],@"artist")];
-        //note: Do not need buffer, url or album artwork for queue table. It is simply a list
-        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 songURL:nil];
-        NSString *tempID = [NSString stringWithFormat:@"%@",newSong.strIdentifier];
-        if([self.addedSongs objectForKey:tempID] == nil){
-            [self.addedSongs setObject:newSong forKey:tempID];
-        }
-        else{
-            SongStruct *temp = [self.addedSongs objectForKey:tempID];
-            [temp Vote];
-        }
-    }
-    [self addedSong];
-    if(!btController.rangingSwitch.on){
-        //get relevant data from songs and add them to the queue
-        NSMutableArray *songData = [[NSMutableArray alloc] init];
-        for(MPMediaItem *item in mediaItemCollection.items){
-            SongStruct *newSong = [[[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL]] artwork:[item valueForProperty:MP];
-            NSLog(@"%@",[newSong mediaURL]);
-            NSLog(@"%@",[item valueForProperty:MPMediaItemPropertyTitle]);
-            //we added the song to our addedSongs dictionary already, so the votecount should be 1
-            if([[self.addedSongs objectForKey:newSong.strIdentifier] votes] == 1){
-                NSLog(@"here");
-                [songData addObject:newSong];
-                
-            }
-            
-        }
-        
-        //if ranging switch is off, we are hosting a playlist.
-        QueueViewController *mainView = [leftController QVC];
-        //add picked songs to our media queue
-        [mainView updatePlayerQueueWithMediaCollection: songData];
-        //update playlist tables of all connected peers. They dont need the media data
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.songArray];
-        [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
-    }
-}
-
--(void) mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker{
-    if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
-        [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
-    } else {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
-}
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -162,7 +65,8 @@
 }
 
 //update our table view with added/edited songs
--(void)addedSong{
+-(void)addSong:(SongStruct *)song{
+    [self.addedSongs setObject:song forKey:song.strIdentifier];
     self.songArray = [self.addedSongs allValues];
 	[self.currentQueue reloadData];
 }
@@ -244,9 +148,7 @@
         BTLEViewController *tempView= [leftController BTLE];
         [LVC setLibraryData:[tempView hostLibrary]];
     }
-    
 }
-
 
 
 @end
