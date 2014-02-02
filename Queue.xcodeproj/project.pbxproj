@@ -354,7 +354,7 @@
 				ORGANIZATIONNAME = Ethan;
 				TargetAttributes = {
 					AA87037318626EB00062A25C = {
-						DevelopmentTeam = 8X5P8C448L;
+						DevelopmentTeam = FJ9NM7ENY8;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;

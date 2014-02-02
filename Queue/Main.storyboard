@@ -103,7 +103,7 @@
             </objects>
             <point key="canvasLocation" x="3045" y="-789"/>
         </scene>
-        <!--Library View Controller - reQuest-->
+        <!--Library View Controller - Host's Library-->
         <scene sceneID="sge-KK-mNH">
             <objects>
                 <tableViewController storyboardIdentifier="LibraryView" id="1cp-fC-gUl" customClass="LibraryViewController" sceneMemberID="viewController">
@@ -134,25 +134,12 @@
                                 </connections>
                             </tableViewCell>
                         </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="1cp-fC-gUl" id="jbr-mQ-Z7K"/>
-                            <outlet property="delegate" destination="1cp-fC-gUl" id="SoO-I6-2Rh"/>
-                        </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="reQuest" id="D2z-7Y-GKJ">
-                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="pNE-Sn-Ttb">
-                            <connections>
-                                <action selector="done:" destination="1cp-fC-gUl" id="4hu-CG-GV0"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="doneButton" destination="pNE-Sn-Ttb" id="jwV-Ye-9Zp"/>
-                    </connections>
+                    <navigationItem key="navigationItem" title="Host's Library" id="D2z-7Y-GKJ"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DEx-5W-TGu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5420" y="-647"/>
+            <point key="canvasLocation" x="4148" y="-319"/>
         </scene>
         <!--Queue Table View Controller - reQuest-->
         <scene sceneID="dS5-B7-Snk">
@@ -176,10 +163,6 @@
                                 </accessibility>
                             </tableViewCell>
                         </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="MZl-in-hoo" id="f1h-th-SD7"/>
-                            <outlet property="delegate" destination="MZl-in-hoo" id="7RS-3K-SM0"/>
-                        </connections>
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="reQuest" id="cFh-4n-Lz4">
@@ -190,9 +173,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="addMusicButton" destination="Ovj-u4-M9N" id="eVl-sp-K3z"/>
-                        <outlet property="currentQueue" destination="gJ4-pU-xcd" id="cM7-fg-FD5"/>
-                        <segue destination="vaG-hK-drA" kind="push" identifier="PickerSegue" id="ZHb-Ux-l6I"/>
+                        <segue destination="1cp-fC-gUl" kind="push" identifier="librarySegue" id="gAO-pR-aNo"/>
+                        <segue destination="ykR-U6-Igl" kind="push" identifier="SCSegue" id="p80-rH-kFy"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cON-Gl-T5m" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -391,53 +373,6 @@
             </objects>
             <point key="canvasLocation" x="2080" y="1074"/>
         </scene>
-        <!--Media Source View Controller - Add Song From...-->
-        <scene sceneID="wXe-kY-1J4">
-            <objects>
-                <viewController id="vaG-hK-drA" customClass="MediaSourceViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="9c7-aC-WCr"/>
-                        <viewControllerLayoutGuide type="bottom" id="XKf-Fk-85A"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="46U-iU-ZPu">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8bJ-kg-FqN">
-                                <rect key="frame" x="101" y="160" width="119" height="40"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Host's Library">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="addLibrarySong" destination="vaG-hK-drA" eventType="touchUpInside" id="V1n-vl-9Bm"/>
-                                    <segue destination="1cp-fC-gUl" kind="push" identifier="LibraryViewSegue" id="XEs-7d-Jq0"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S8R-h0-DMD">
-                                <rect key="frame" x="101" y="378" width="119" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="SoundCloud">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="addSoundCloud" destination="vaG-hK-drA" eventType="touchUpInside" id="JTD-v4-ccf"/>
-                                    <segue destination="ykR-U6-Igl" kind="push" identifier="SCSegue" id="Rtg-9l-EtD"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                    </view>
-                    <navigationItem key="navigationItem" title="Add Song From..." id="3Cg-NX-w9X"/>
-                    <connections>
-                        <outlet property="hostLibraryButton" destination="8bJ-kg-FqN" id="kAG-V1-We4"/>
-                        <outlet property="soundCloudButton" destination="S8R-h0-DMD" id="pFg-QR-uX9"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dYB-gH-0hv" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4506" y="245"/>
-        </scene>
         <!--You View Controller - You-->
         <scene sceneID="XjM-vz-sRW">
             <objects>
@@ -531,7 +466,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KVY-9O-9nf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="6108" y="829"/>
+            <point key="canvasLocation" x="4836" y="493"/>
         </scene>
         <!--Search View Controller - Search-->
         <scene sceneID="hEi-2D-aCf">
@@ -604,7 +539,7 @@
                     </connections>
                 </searchDisplayController>
             </objects>
-            <point key="canvasLocation" x="6108" y="1545"/>
+            <point key="canvasLocation" x="4836" y="1209"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="gJV-eK-OlP">
@@ -624,7 +559,7 @@
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Bys-IV-4PF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5420" y="1211"/>
+            <point key="canvasLocation" x="4148" y="875"/>
         </scene>
     </scenes>
     <resources>
