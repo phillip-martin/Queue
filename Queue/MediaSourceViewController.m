@@ -144,10 +144,9 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     // Make sure your segue name in storyboard is the same as this line
-    if ([[segue identifier] isEqualToString:@"LibrarySegue"])
+    if ([[segue identifier] isEqualToString:@"LibraryViewSegue"])
     {
-        UINavigationController *nav = segue.destinationViewController;
-        LibraryViewController *LVC = nav.viewControllers[0];
+        LibraryViewController *LVC = segue.destinationViewController;
         [LVC setLibraryDelegate:self];
         [LVC setLibraryData:[btController hostLibrary]];
     }
