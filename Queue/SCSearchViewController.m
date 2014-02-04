@@ -31,9 +31,8 @@
     // Dispose of any resources that can be recreated.
 }
 
--(void)filterContentForSearchText:(NSString*)searchText scope:(NSString*)scope {
-    // Update the filtered array based on the search text and scope.
-    // Remove all objects from the filtered search array
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
     SCRequestResponseHandler searchHandler;
     searchHandler = ^(NSURLResponse *response, NSData *data, NSError *error) {
         NSError *jsonError = nil;
@@ -48,7 +47,7 @@
         }
     };
     
-    NSString *profileURL = [NSString stringWithFormat: @"http://api.soundcloud.com/tracks.json?{client_id={105963b586ee9e7633eef11e29ee5e20}&q={%@}&limit=20&streamable=true&order=playback_count",searchText];
+    NSString *profileURL = [NSString stringWithFormat: @"http://api.soundcloud.com/tracks.json?{client_id={105963b586ee9e7633eef11e29ee5e20}&q={%@}&limit=20&streamable=true&order=playback_count",searchString];
     
     [SCRequest performMethod:SCRequestMethodGET
                   onResource:[NSURL URLWithString:profileURL]
@@ -57,8 +56,18 @@
       sendingProgressHandler:nil
              responseHandler:searchHandler];
     
+}
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchScope:(NSInteger)searchOption
+{
     
 }
+
+- (void)searchDisplayControllerDidBeginSearch:(UISearchDisplayController *)controller
+{
+    
+}
+
 
 #pragma mark - Table view data source
 
