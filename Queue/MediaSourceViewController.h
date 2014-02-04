@@ -10,9 +10,11 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "LibraryViewController.h"
 #import "LeftPanelViewController.h"
+#import "SCYouViewController.h"
+#import "SCSearchViewController.h"
 #import "SCUI.h"
 
-@interface MediaSourceViewController : UIViewController <LibraryViewControllerDelegate, MPMediaPickerControllerDelegate>
+@interface MediaSourceViewController : UIViewController <LibraryViewControllerDelegate, MPMediaPickerControllerDelegate, SCYouViewControllerDelegate>
 
 @property (nonatomic) IBOutlet UIButton *soundCloudButton;
 @property (nonatomic) IBOutlet UIButton *hostLibraryButton;

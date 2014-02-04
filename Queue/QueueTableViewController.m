@@ -49,7 +49,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
 }
 
 - (void)didReceiveMemoryWarning
@@ -152,7 +151,8 @@
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
     if([[segue identifier] isEqual:@"PickerSegue"]){
-        MediaSourceViewController *MSVC = segue.destinationViewController;
+        UINavigationController *navController =  segue.destinationViewController;
+        MediaSourceViewController *MSVC = navController.viewControllers[0];
         LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
         [MSVC setLeftController:leftController];
         

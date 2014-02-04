@@ -47,6 +47,12 @@
     self.votes++;
 }
 
+-(void)imageFromURL:(NSURL *)url{
+    NSData *imageData = [NSData dataWithContentsOfURL:url];
+    self.artwork = [UIImage imageWithData:imageData];
+    
+}
+
 -(NSString *)identifier
 {
     return [NSString stringWithFormat:@"%@%@",self.title,self.artist];

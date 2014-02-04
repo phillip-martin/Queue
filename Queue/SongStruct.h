@@ -21,5 +21,6 @@
 -(id)initWithTitle:(NSString *)strTitle artist:(NSString *)strArtist voteCount:(NSInteger) count songURL:(NSURL *)url artwork:(UIImage *)art;
 -(NSString *)identifier;
 -(void) Vote;
+-(void)imageFromURL:(NSURL *)url;
 
 @end

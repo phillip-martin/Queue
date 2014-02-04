@@ -16,8 +16,8 @@
 
 + (void) initialize
 {
-    [SCSoundCloud setClientID:@""
-                       secret:@""
+    [SCSoundCloud setClientID:@"105963b586ee9e7633eef11e29ee5e20"
+                       secret:@"c178f92829c5d1e342989adbb2cc5ad4"
                   redirectURL:[NSURL URLWithString:@"queue://oauth"]];
 }
 

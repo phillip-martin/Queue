@@ -66,6 +66,7 @@
 	// Do any additional setup after loading the view.
     btController = [leftController BTLE];
     queueTableController = [leftController QTVC];
+    account = [SCSoundCloud account];
 }
 
 - (void)didReceiveMemoryWarning
@@ -84,6 +85,38 @@
         for(SongStruct *tempSong in songs){
             //QueueTable delegate method
             [queueTableController addSong:tempSong];
+        }
+        
+    }
+    if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
+        [self performSelector:@selector(dismissModalViewControllerAnimated:) withObject:[NSNumber numberWithBool:YES]];
+    } else {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+
+//chose song from soundcloud. Clients and host
+-(void)youViewController:(SCYouViewController *)YouViewController didChooseSongs:(NSMutableArray *)songs
+{
+    if([songs count] > 0){
+        
+        //make an array that contains the SongStructs we create from the dicitonary songs. For sending data
+        NSMutableArray *structuredSongs = [[NSMutableArray alloc] init];
+        //each song is a JSON object
+        for(NSDictionary *tempSong in songs){
+            //QueueTable delegate method
+            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[tempSong objectForKey:@"title"] artist:Nil voteCount:1 songURL:[tempSong objectForKey:@"stream_url"] artwork:nil];
+            [newSong imageFromURL:[tempSong objectForKey:@"artwork_url"]];
+            [queueTableController addSong:newSong];
+            [structuredSongs addObject:newSong];
+        }
+        if(btController.advertisingSwitch.on){
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:structuredSongs];
+            [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
+        }
+        else if(btController.rangingSwitch.on){
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:structuredSongs];
+            [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:btController.connectedPeer, nil] reliable:YES error:nil];
         }
         
     }
@@ -150,10 +183,11 @@
         [LVC setLibraryDelegate:self];
         [LVC setLibraryData:[btController hostLibrary]];
     }
-    else if ([[segue identifier] isEqualToString:@"SCSegue"]){
-
-        
+    else if([[segue identifier] isEqualToString:@"SCSegue"]){
+        SCYouViewController *youViewController = segue.destinationViewController;
+        youViewController.delegate = self;
     }
+    
 }
 
 @end

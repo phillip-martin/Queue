@@ -7,10 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SCUI.h"
 
 @interface SCSearchViewController : UIViewController <UISearchBarDelegate, UISearchDisplayDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property IBOutlet UISearchBar *searchBar;
 @property (nonatomic) NSMutableArray *filteredSCArray;
+@property (assign) SCAccount *account;
 
 @end

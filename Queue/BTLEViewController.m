@@ -370,7 +370,6 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
             //handling of adding songs should be the same on QTVC for both server and client
             for (SongStruct *item in newPlaylist) {
                 //if we dont have have the song, query for it in our library, then add it
-                NSString *tempID = [NSString stringWithFormat:@"%@",item.strIdentifier];
                 if(self.advertisingSwitch.on){//if we're hosting the playlist
                     MPMediaPropertyPredicate *artistNamePredicate =
                     [MPMediaPropertyPredicate predicateWithValue: item.artist
