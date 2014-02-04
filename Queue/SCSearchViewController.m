@@ -47,7 +47,7 @@
         }
     };
     
-    NSString *profileURL = [NSString stringWithFormat: @"http://api.soundcloud.com/tracks.json?{client_id={105963b586ee9e7633eef11e29ee5e20}&q={%@}&limit=20&streamable=true&order=playback_count",searchString];
+    NSString *profileURL = [NSString stringWithFormat: @"http://api.soundcloud.com/tracks.json?{client_id={}&q={%@}&limit=20&streamable=true&order=playback_count",searchString];
     
     [SCRequest performMethod:SCRequestMethodGET
                   onResource:[NSURL URLWithString:profileURL]
