@@ -21,6 +21,11 @@
 @property (nonatomic) NSMutableDictionary *addedSongs;
 @property (nonatomic) UIBarButtonItem *addMusicButton;
 @property (nonatomic) NSArray *songArray;
+@property (nonatomic) BOOL addSongIsPressed;
+@property (nonatomic) UIButton *goToHost;
+@property (nonatomic) UIButton *goToSC;
+@property (nonatomic) UIView *shadow;
+@property (nonatomic) UIView *selectionBox;
 
 -(void)refreshTable;
 -(void)addSong:(SongStruct *)song;
