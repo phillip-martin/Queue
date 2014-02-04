@@ -20,11 +20,71 @@
 @synthesize currentQueue;
 @synthesize addMusicButton;
 @synthesize songArray;
+@synthesize addSongIsPressed;
+@synthesize goToHost;
+@synthesize goToSC;
+@synthesize shadow;
+@synthesize selectionBox;
 
 - (IBAction) addHandler {
     
-    [self performSegueWithIdentifier:@"PickerSegue" sender:self];
+    //if addMusicButton is already pressed remove the shadow and selectionBox
+    if (addSongIsPressed == true) {
+        [shadow removeFromSuperview];
+        [selectionBox removeFromSuperview];
+        addSongIsPressed = false;
+        return;
+    }
+    else {
+        addSongIsPressed = true;
+    }
+
+    
+    //create another view with black background and alpha<1
+    shadow = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    shadow.backgroundColor = [UIColor blackColor];
+    shadow.alpha = 0.5;
+    [self.view addSubview:shadow];
+
+    
+    //create box for choosing either from hosts library or soundcloud
+    selectionBox = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-20, 20, self.view.frame.size.width/2, 100)];
+    selectionBox.backgroundColor = [UIColor whiteColor];
+    [shadow addSubview:selectionBox];
+    
+    
+    //add proper buttons to selectionBox
+        //go to hosts library
+    self.goToHost = [[UIButton alloc] initWithFrame:CGRectMake(10, 10, selectionBox.frame.size.width -20, selectionBox.frame.size.height/2-20)];
+    [goToHost setTitle:@"Host's Library" forState:UIControlStateNormal];
+    goToHost.backgroundColor = [UIColor blackColor];
+    [goToHost addTarget:self action:@selector(goToHost:) forControlEvents:UIControlEventTouchUpInside];
+    [selectionBox addSubview:goToHost];
+    
+    
+        //go to sound cloud
+    goToSC = [[UIButton alloc] initWithFrame:CGRectMake(10,selectionBox.frame.size.height/2+10,selectionBox.frame.size.width-20, selectionBox.frame.size.height/2-20)];
+    [goToSC setTitle:@"Sound Cloud" forState:UIControlStateNormal];
+    goToSC.backgroundColor = [UIColor blackColor];
+    [goToSC addTarget:self action:@selector(goToSC:) forControlEvents:UIControlEventTouchUpInside];
+    [selectionBox addSubview:goToSC];
+    
+    
 }
+
+-(void)goToHost:(id)senderA{
+    NSLog(@"senderA");
+    [shadow removeFromSuperview];
+    [selectionBox removeFromSuperview];
+    [self performSegueWithIdentifier:@"librarySegue" sender:senderA];
+}
+
+-(void)goToSC:(id)senderB{
+    NSLog(@"senderB");
+    [self performSegueWithIdentifier:@"SCSegue" sender:senderB];
+}
+
+
 
 //vote button for song
 -(void)upVote:(id)sender{
@@ -48,7 +108,11 @@
 
 - (void)viewDidLoad
 {
+
     [super viewDidLoad];
+    
+    //set addSongisPressed to false
+    addSongIsPressed = false;
 
 }
 
@@ -152,13 +216,20 @@
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
     if([[segue identifier] isEqual:@"PickerSegue"]){
-        UINavigationController *nav = segue.destinationViewController;
-        MediaSourceViewController *MSVC = nav.viewControllers[0];
+        MediaSourceViewController *MSVC = segue.destinationViewController;
         LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
         [MSVC setLeftController:leftController];
         
     }
+    else if([[segue identifier] isEqual:@"librarySegue"]){
+        LibraryViewController *LVC = segue.destinationViewController;
+    }
 }
 
+
+- (void) viewDidAppear:(BOOL)animated
+{
+    [self.navigationController popToRootViewControllerAnimated:NO];
+}
 
 @end

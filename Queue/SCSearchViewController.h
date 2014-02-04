@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SCSearchViewController : UITableViewController <UISearchBarDelegate, UISearchDisplayDelegate, UITableViewDelegate, UITableViewDataSource>
+@interface SCSearchViewController : UIViewController <UISearchBarDelegate, UISearchDisplayDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property IBOutlet UISearchBar *searchBar;
 @property (nonatomic) NSMutableArray *filteredSCArray;
