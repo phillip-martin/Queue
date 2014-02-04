@@ -56,11 +56,13 @@
       sendingProgressHandler:nil
              responseHandler:searchHandler];
     
+    return true;
+    
 }
 
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchScope:(NSInteger)searchOption
 {
-    
+    return true;
 }
 
 - (void)searchDisplayControllerDidBeginSearch:(UISearchDisplayController *)controller

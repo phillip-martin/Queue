@@ -64,6 +64,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSLog(@"%@",self.navigationController);
     selectedSongs = [[NSMutableArray alloc] init];
     songButtons = [[NSMutableArray alloc] init];
     account = [SCSoundCloud account];
@@ -304,8 +305,6 @@
         [self presentModalViewController:loginViewController animated:YES];
     }];
 }
-
-
 
 
 @end
