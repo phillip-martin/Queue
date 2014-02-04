@@ -12,7 +12,8 @@
 @interface SCSearchViewController : UIViewController <UISearchBarDelegate, UISearchDisplayDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property IBOutlet UISearchBar *searchBar;
-@property (nonatomic) NSMutableArray *filteredSCArray;
+@property (nonatomic) NSArray *searchArray;
+@property (nonatomic) NSMutableArray *selectedSongs;
 @property (assign) SCAccount *account;
 
 @end

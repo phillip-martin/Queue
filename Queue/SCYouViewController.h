@@ -22,11 +22,15 @@
 @property (nonatomic) IBOutlet UIBarButtonItem *doneButton;
 @property (nonatomic) IBOutlet UITableView *tableView;
 @property (nonatomic) NSArray *tracks;
+@property (nonatomic) NSArray *playlists;
+@property (nonatomic) NSArray *posts;
+@property (nonatomic) NSArray *currentData;
 @property (nonatomic) SCAccount *account;
 @property (nonatomic) NSMutableArray *selectedSongs;
 @property (nonatomic) NSMutableArray *songButtons;
 
 -(IBAction)addHandler:(id)sender;
+-(IBAction)segmentedControl:(id)sender;
 
 @end
 

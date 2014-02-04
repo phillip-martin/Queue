@@ -461,15 +461,15 @@
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="gray" indentationWidth="10" reuseIdentifier="Track" rowHeight="55" id="ZuM-AR-bdB">
-                                        <rect key="frame" x="0.0" y="22" width="280" height="55"/>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="gray" indentationWidth="10" reuseIdentifier="Track" rowHeight="65" id="ZuM-AR-bdB">
+                                        <rect key="frame" x="0.0" y="22" width="280" height="65"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ZuM-AR-bdB" id="ycP-xj-kFj">
-                                            <rect key="frame" x="0.0" y="0.0" width="280" height="54"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="280" height="64"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="contactAdd" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QHI-Xw-ROu">
-                                                    <rect key="frame" x="249" y="15" width="22" height="22"/>
+                                                    <rect key="frame" x="249" y="22" width="22" height="22"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                     <state key="normal">
@@ -482,7 +482,7 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailing" secondItem="QHI-Xw-ROu" secondAttribute="trailing" constant="9" id="Vxl-sw-Mb8"/>
-                                                <constraint firstItem="QHI-Xw-ROu" firstAttribute="top" secondItem="ycP-xj-kFj" secondAttribute="top" constant="15" id="WoU-fY-6Fi"/>
+                                                <constraint firstItem="QHI-Xw-ROu" firstAttribute="top" secondItem="ycP-xj-kFj" secondAttribute="top" constant="22" id="WoU-fY-6Fi"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
@@ -508,6 +508,9 @@
                                     <segment title="Likes"/>
                                 </segments>
                                 <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <action selector="segmentedControl:" destination="fUH-vN-SaH" eventType="valueChanged" id="lXp-dr-Lo3"/>
+                                </connections>
                             </segmentedControl>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -660,11 +663,11 @@
             </objects>
             <point key="canvasLocation" x="5420" y="-607"/>
         </scene>
-        <!--Navigation Controller - Item-->
+        <!--Navigation Controller - You-->
         <scene sceneID="foG-rF-k6w">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="ceh-S1-0Ns" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="BZr-Tr-iQv"/>
+                    <tabBarItem key="tabBarItem" title="You" id="BZr-Tr-iQv"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="mPj-Tc-NNw">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
@@ -679,11 +682,11 @@
             </objects>
             <point key="canvasLocation" x="6102" y="829"/>
         </scene>
-        <!--Navigation Controller - Item-->
+        <!--Navigation Controller - Search-->
         <scene sceneID="KU1-Qx-qHV">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="TW4-Bn-H0y" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="MAW-2g-1ME"/>
+                    <tabBarItem key="tabBarItem" title="Search" id="MAW-2g-1ME"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="3mr-kw-63O">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
