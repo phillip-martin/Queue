@@ -75,7 +75,7 @@
     NSLog(@"senderA");
     [shadow removeFromSuperview];
     [selectionBox removeFromSuperview];
-    if(btController.advertisingSwitch.on){
+    if(!btController.rangingSwitch.on){
         MPMediaPickerController *mediaPicker =
         [[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
         
@@ -93,7 +93,6 @@
     
     else{
         [self performSegueWithIdentifier:@"LibrarySegue" sender:self];
-        
     }
 }
 
@@ -335,7 +334,8 @@
         [LVC setLibraryData:[btController hostLibrary]];
     }
     else if([[segue identifier] isEqualToString:@"SCSegue"]){
-        UINavigationController *navController = segue.destinationViewController;
+        UITabBarController *tabController = segue.destinationViewController;
+        UINavigationController *navController = tabController.viewControllers[0];
         SCYouViewController *youViewController = navController.viewControllers[0];
         youViewController.delegate = self;
     }

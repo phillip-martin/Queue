@@ -134,8 +134,17 @@
                                 </connections>
                             </tableViewCell>
                         </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="1cp-fC-gUl" id="pc7-RV-jN6"/>
+                            <outlet property="delegate" destination="1cp-fC-gUl" id="NsJ-K7-Bfa"/>
+                        </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Host's Library" id="D2z-7Y-GKJ">
+                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="done" id="2EC-5d-C0g">
+                            <connections>
+                                <action selector="done:" destination="1cp-fC-gUl" id="x55-kY-3HS"/>
+                            </connections>
+                        </barButtonItem>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="boolean" keyPath="hidesBackButton" value="YES"/>
                         </userDefinedRuntimeAttributes>
