@@ -7,6 +7,7 @@
 //
 
 #import "SCYouViewController.h"
+#import "SongStruct.h"
 
 @interface SCYouViewController ()
 
@@ -67,7 +68,11 @@
     NSLog(@"%@",self.navigationController);
     selectedSongs = [[NSMutableArray alloc] init];
     songButtons = [[NSMutableArray alloc] init];
+    tracks = [[NSMutableArray alloc] init];
+    playlists = [[NSMutableArray alloc] init];
+    posts =[[NSMutableArray alloc] init];
     account = [SCSoundCloud account];
+    self.tableView.rowHeight = 65;
     [self profileData];
     
 }
@@ -116,8 +121,8 @@
         
         if (!jsonError && [jsonResponse isKindOfClass:[NSArray class]]) {
             
+            //put each JSON response song into a songStruct
             tracks = (NSArray *)jsonResponse;
-            
         }
     };
     
@@ -141,7 +146,9 @@
         
         if (!jsonError && [jsonResponse isKindOfClass:[NSArray class]]) {
             
+            
             posts = (NSArray *)jsonResponse;
+            
             //show posts in table on load
             currentData = posts;
             [self.tableView reloadData];
@@ -192,21 +199,9 @@
     // Dispose of any resources that can be recreated.
 }
 
-//resize image to fit cell
--(UIImage *)resizeimage:(UIImage *)image toSize:(CGSize)size{
-    UIGraphicsBeginImageContext( size );
-    CGRect rect = CGRectMake(0, 0, size.width, size.height);
-    [image drawInRect:rect];
-    UIImage *picture1 = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-        
-    NSData *imageData = UIImagePNGRepresentation(picture1);
-    UIImage *img=[UIImage imageWithData:imageData];
-    return img;
-    
-}
-
 #pragma mark - Table view data source
+
+
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -225,15 +220,33 @@
     return [currentData count];
 }
 
+//causes runtime error. Dictionary deallocated before access??
 -(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    [selectedSongs addObject:[currentData objectAtIndex:indexPath.row]];
+    NSDictionary *tempSong = (NSDictionary *)[currentData objectAtIndex:indexPath.row];
+    NSDictionary *user = [tempSong objectForKey:@"user"];
+    SongStruct *newSong = [[SongStruct alloc] initWithTitle:[tempSong objectForKey:@"title"] artist:[user objectForKey:@"username"] voteCount:1 songURL:[NSURL URLWithString:(NSString *)[tempSong objectForKey:@"stream_url"]] artwork:nil type:@"SC"];
+    //some images were being returned as NSNULL
+    if(![[tempSong objectForKey:@"artwork_url"] isKindOfClass:[NSNull class]]){
+        [newSong setArtworkURL:[NSURL URLWithString:[[tempSong objectForKey:@"artwork_url"] stringByReplacingOccurrencesOfString:@"large" withString:@"t300x300"]]];
+        [newSong imageFromURL:[newSong artworkURL]];
+        NSURL *imageURL = [NSURL URLWithString:[[tempSong objectForKey:@"artwork_url"] stringByReplacingOccurrencesOfString:@"large" withString:@"badge"]];
+        NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+        UIImage *tempImage = [UIImage imageWithData:imageData];
+        [newSong setTinyArtwork:tempImage];
+        
+    }
+    NSLog(@"added %@",newSong.title);
+    [selectedSongs addObject:newSong];
     
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [selectedSongs addObject:[currentData objectAtIndex:indexPath.row]];
+    
+    SongStruct *tempSong = (SongStruct *)[currentData objectAtIndex:indexPath.row];
+    NSLog(@"added %@",tempSong.title);
+    [selectedSongs addObject:tempSong];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -254,14 +267,14 @@
     NSLog(@"%d",indexPath.row);
     UILabel *titleLabel;
     UILabel *artistLabel;
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(42.0, 5.0, 190.0, 25)];
+    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(49.0, 5.0, 190.0, 25)];
     titleLabel.font = [UIFont systemFontOfSize:15.0];
     titleLabel.textAlignment = NSTextAlignmentLeft;
     titleLabel.textColor = [UIColor blackColor];
     
     [cell.contentView addSubview:titleLabel];
     
-    artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(42.0, 25.0, 190.0, 20.0)];
+    artistLabel = [[UILabel alloc] initWithFrame:CGRectMake(49.0, 25.0, 190.0, 20.0)];
     artistLabel.font = [UIFont systemFontOfSize:13.0];
     artistLabel.textAlignment = NSTextAlignmentLeft;
     artistLabel.textColor = [UIColor darkGrayColor];
@@ -269,9 +282,9 @@
     [cell.contentView addSubview:artistLabel];
     
     NSDictionary *track = (NSDictionary *)[currentData objectAtIndex:indexPath.row];
-    titleLabel.text = [track objectForKey:@"title"];
-    
     NSDictionary *user = [track objectForKey:@"user"];
+    
+    titleLabel.text = [track objectForKey:@"title"];
     artistLabel.text = [user objectForKey:@"username"];
     
     UIButton *addButton = (UIButton *)cell.accessoryView;
@@ -280,14 +293,15 @@
     [songButtons addObject:addButton];
     [cell.contentView addSubview:addButton];
     
-    UIImageView *albumView = [[UIImageView alloc] initWithFrame:CGRectMake(0.0,7.5,40.0,40.0)];
+    UIImageView *albumView = [[UIImageView alloc] initWithFrame:CGRectMake(0.0,3,47.0,47.0)];
     [cell.contentView addSubview:albumView];
     
     if(![[track objectForKey:@"artwork_url"] isKindOfClass:[NSNull class]]){
-        NSURL *imageURL = [NSURL URLWithString:[track objectForKey:@"artwork_url"]];
+        
+        NSURL *imageURL = [NSURL URLWithString:[[track objectForKey:@"artwork_url"] stringByReplacingOccurrencesOfString:@"large" withString:@"badge"]];
         NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
         UIImage *tempImage = [UIImage imageWithData:imageData];
-        albumView.image = [self resizeimage:tempImage toSize:CGSizeMake(40.0, 40.0)];
+        albumView.image = tempImage;
     }
     return cell;
 }

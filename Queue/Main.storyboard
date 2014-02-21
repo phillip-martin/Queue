@@ -58,7 +58,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CJh-hc-21M">
-                                        <rect key="frame" x="20" y="98" width="280" height="280"/>
+                                        <rect key="frame" x="10" y="80" width="300" height="300"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     </imageView>
                                     <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PjZ-qW-YnK">
@@ -176,6 +176,10 @@
                                 </accessibility>
                             </tableViewCell>
                         </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="MZl-in-hoo" id="3O4-am-mfe"/>
+                            <outlet property="delegate" destination="MZl-in-hoo" id="U4L-vS-ZWb"/>
+                        </connections>
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="reQuest" id="cFh-4n-Lz4">
@@ -186,6 +190,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="currentQueue" destination="gJ4-pU-xcd" id="1lz-R4-wRi"/>
                         <segue destination="VHh-ks-cZu" kind="modal" identifier="LibrarySegue" id="gAO-pR-aNo"/>
                         <segue destination="vGs-F9-fFf" kind="modal" identifier="SCSegue" id="aEE-ic-JuV"/>
                     </connections>

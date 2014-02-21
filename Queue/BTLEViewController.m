@@ -389,7 +389,7 @@ typedef NS_ENUM(NSUInteger, NTOperationsRow) {
                     NSMutableArray *hostSongs = [[NSMutableArray alloc] init];
                     for(MPMediaItem *item in collection.items){
                         //host songstruct includes url/buffer. Client songs do not
-                        SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+                        SongStruct *tempSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork] type:@"itunes"];
                         [hostSongs addObject:tempSong];
                         
                     }

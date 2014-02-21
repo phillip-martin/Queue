@@ -125,6 +125,7 @@
     [super viewDidLoad];
 
     //set addSongisPressed to false
+    self.addedSongs = [[NSMutableDictionary alloc] init];
     addSongIsPressed = false;
     LeftPanelViewController *leftController = (LeftPanelViewController *)self.sidePanelController.leftPanel;
     btController = [leftController BTLE];
@@ -161,24 +162,19 @@
 {
     if([songs count] > 0){
         
-        //make an array that contains the SongStructs we create from the dicitonary songs. For sending data
-        NSMutableArray *structuredSongs = [[NSMutableArray alloc] init];
-        //each song is a JSON object
-        for(NSDictionary *tempSong in songs){
-            //QueueTable delegate method
-            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[tempSong objectForKey:@"title"] artist:Nil voteCount:1 songURL:[tempSong objectForKey:@"stream_url"] artwork:nil];
-            [newSong imageFromURL:[tempSong objectForKey:@"artwork_url"]];
-            [self addSong:newSong];
-            [structuredSongs addObject:newSong];
+        for(SongStruct *tempSong in songs){
+            [self addSong:tempSong];
         }
         if(btController.advertisingSwitch.on){
-            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:structuredSongs];
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:songs];
             [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:@"all", nil] reliable:YES error:nil];
         }
         else if(btController.rangingSwitch.on){
-            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:structuredSongs];
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:songs];
             [btController sendData:data toPeers:[[NSArray alloc] initWithObjects:btController.connectedPeer, nil] reliable:YES error:nil];
         }
+        QueueViewController *mainView = [(LeftPanelViewController *)self.sidePanelController.leftPanel QVC];
+        [mainView updatePlayerQueueWithMediaCollection:songs];
         
     }
     if ([self respondsToSelector:@selector(dismissModalViewControllerAnimated:)]) {
@@ -201,7 +197,7 @@
         NSString *tempTitle = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyTitle],@"title")];
         NSString *tempArtist = [NSString stringWithFormat:NSLocalizedString([[mediaItemCollection.items objectAtIndex:i] valueForProperty:MPMediaItemPropertyArtist],@"artist")];
         //note: Do not need buffer, url or album artwork for queue table. It is simply a list
-        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 songURL:nil artwork:nil];
+        SongStruct *newSong = [[SongStruct alloc] initWithTitle:tempTitle artist:tempArtist voteCount:1 songURL:nil artwork:nil type:@"itunes"];
         [self addSong:newSong];
         
     }
@@ -209,7 +205,7 @@
         //get relevant data from songs and add them to the queue
         NSMutableArray *songData = [[NSMutableArray alloc] init];
         for(MPMediaItem *item in mediaItemCollection.items){
-            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork]];
+            SongStruct *newSong = [[SongStruct alloc] initWithTitle:[item valueForProperty:MPMediaItemPropertyTitle] artist:[item valueForProperty:MPMediaItemPropertyArtist] voteCount:1 songURL:[item valueForProperty:MPMediaItemPropertyAssetURL] artwork:[item valueForProperty:MPMediaItemPropertyArtwork] type:@"itunes"];
             NSLog(@"%@",[newSong mediaURL]);
             NSLog(@"%@",[item valueForProperty:MPMediaItemPropertyTitle]);
             //add song to queue table
@@ -339,7 +335,6 @@
         SCYouViewController *youViewController = navController.viewControllers[0];
         youViewController.delegate = self;
     }
-    
 }
 
 
